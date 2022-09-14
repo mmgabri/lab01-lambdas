@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Projeto Lab
+
+Globals:
+  Function:
+    Timeout: 20
+
+Parameters:
+  ParameterClientId:
+    Type: String
+    Default: "1dvekd807buibj92s4vn1jd901"
+  ParameterUserPool:
+    Type: String
+    Default: "us-east-1_MsqKPhJ3m"
+  ParameterAcessKey:
+    Type: String
+    Default: "AKIASEICDKSYQCQ22ONQ"
+  ParameterSecretKey:
+    Type: String
+    Default: "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"
+  ParameterTableName:
+    Type: String
+    Default: ""
+
+Resources:
+  UserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: userFunction
+      Handler: mmgabri.lambda.Handler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          CLIENT_ID: !Ref ParameterClientId
+          USER_POOL: !Ref ParameterUserPool
+          ACESS_KEY: !Ref ParameterAcessKey
+          SECRET_KEY: !Ref ParameterSecretKey
+      Events:
+        Signup:
+          Type: Api
+          Properties:
+            Path: /signup
+            Method: post
+        ConfirmSignup:
+          Type: Api
+          Properties:
+            Path: /confirmsignup
+            Method: post
+        Signin:
+          Type: Api
+          Properties:
+            Path: /signin
+            Method: post
+
