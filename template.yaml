@@ -20,11 +20,81 @@ Parameters:
   ParameterSecretKey:
     Type: String
     Default: "2fUSXGGK24qnfU/RFVOaYb5C8Ey8N1Gr9zy4D1JA"
-  ParameterTableName:
+  ParameterTableNameAnuncio:
     Type: String
-    Default: ""
+    Default: "anuncios"
+  apiGatewayName:
+    Type: String
+    Default: my-api-v2
+  apiGatewayStageName:
+    Type: String
+    AllowedPattern: "[a-z0-9]+"
+    Default: prod
+  apiGatewayHTTPMethod:
+    Type: String
+    Default: GET
+  lambdaFunctionName:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
+    Default: my-function
+  CognitoUserPoolArn:
+    Description: ARN of the Cognito User Pool
+    Type: "String"
+    Default: "arn:aws:cognito-idp:us-east-1:146570171569:userpool/us-east-1_MsqKPhJ3m"
 
 Resources:
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        ApiKeyRequired: true
+        DefaultAuthorizer: MyCognitoAuth 
+        Authorizers:
+          MyCognitoAuth:
+            UserPoolArn: !Ref CognitoUserPoolArn
+            Identity: 
+              Header: Authorization 
+
+  TestAPIUsagePlan:
+    Type: 'AWS::ApiGateway::UsagePlan'
+    DependsOn:
+      - ServerlessRestApiProdStage
+    Properties:
+      ApiStages:
+        - ApiId: !Ref ApiGateway
+          Stage: prod
+      Description: To test usage plan and api key in REST API.
+      Quota:
+        Limit: 100
+        Period: MONTH
+      UsagePlanName: "test-usage-plan"
+      
+  TestApiAccessKey:
+    Type: 'AWS::ApiGateway::ApiKey'
+    DependsOn:
+      - TestAPIUsagePlan
+    Properties:
+      Name: "test-api-key"
+      Description: To test usage plan and api key in REST API.
+      Tags: 
+        - Key: Mode
+          Value: Learning
+      Enabled: true
+      StageKeys:
+       - RestApiId: !Ref ApiGateway
+         StageName: prod
+         
+  LinkUsagePlanApiKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn:
+      - ServerlessRestApi
+    Properties:
+      KeyId: !Ref TestApiAccessKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref TestAPIUsagePlan
+ 
   UserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -44,16 +114,55 @@ Resources:
         Signup:
           Type: Api
           Properties:
-            Path: /signup
+            Path: /users/signup
+     #       RestApiId: !Ref ApiGateway
             Method: post
         ConfirmSignup:
           Type: Api
           Properties:
-            Path: /confirmsignup
+            Path: /users/confirmsignup
+   #         RestApiId: !Ref ApiGateway
             Method: post
         Signin:
           Type: Api
           Properties:
-            Path: /signin
+            Path: /users/signin
+       #     RestApiId: !Ref ApiGateway
+            Method: post
+        Signout:
+          Type: Api
+          Properties:
+            Path: /users/signout
+       #     RestApiId: !Ref ApiGateway
             Method: post
 
+  AnuncioFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: anuncioFunction
+      Handler: mmgabri.lambda.Handler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ParameterTableNameAnuncio
+      Events:
+        EventHello1:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: '/anuncios/hello'
+            RestApiId: !Ref ApiGateway
+            Auth:
+              Authorizer: MyCognitoAuth 
+        EventHello2:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: '/anuncios/hello2'
+            RestApiId: !Ref ApiGateway
+            Auth:
+              Authorizer: NONE
+  

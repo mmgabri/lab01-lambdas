@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 @RequiredArgsConstructor
 public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Logger logger = LoggerFactory.getLogger(UseCaseImpl.class);
-    private final AuthServiceImpl auth;
+  //  private final AuthServiceImpl auth;
     private final Gson gson;
 
     @Override
@@ -21,24 +21,15 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
         logger.info("Processando resource " + event.getResource());
 
         switch (event.getResource()) {
-            case "/users/signup":
+            case "/anuncios/hello":
                 try {
-                    SignupResponse resp = auth.signUp(gson.fromJson(event.getBody(), SignupRequest.class));
-                    return builderResponse(200, gson.toJson(resp));
+                    return builderResponse(200, gson.toJson(builderBodyError("Sucess!")));
                 } catch (RequestDeniedException e) {
                     return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                 }
-            case "/users/confirmsignup":
+            case "/anuncios/hello2":
                 try {
-                    ConfirmSignupResponse resp = auth.confirmSignUp(gson.fromJson(event.getBody(), ConfirmSignupRequest.class));
-                    return builderResponse(200, gson.toJson(resp));
-                } catch (RequestDeniedException e) {
-                    return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
-                }
-            case "/users/signin":
-                try {
-                    SigninResponse resp = auth.signin(gson.fromJson(event.getBody(), SigninRequest.class));
-                    return builderResponse(200, gson.toJson(resp));
+                    return builderResponse(201, gson.toJson(builderBodyError("Sucess!")));
                 } catch (RequestDeniedException e) {
                     return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                 }
