@@ -50,15 +50,15 @@ Parameters:
     Default: lab01-lambdas
   ParameterApiGatewayStageName:
     Type: String
-    Default: "Prod"
+    Default: Prod
 
 Resources:
   #------------  Api Gateway ------------#
   ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Ref ParameterApiGatewayName
-      StageName: Prod
+   #   Name: !Ref ParameterApiGatewayName
+      StageName: !Ref ParameterApiGatewayStageName
       Auth:
         ApiKeyRequired: true
         DefaultAuthorizer: CognitoAuth 
@@ -74,8 +74,6 @@ Resources:
     DependsOn:
       - ApiGatewayProdStage
     Properties:
-      Name: !Join ["", [{"Ref": "AWS::StackName"}, "-apikey"]]
-      Enabled: true
       StageKeys:
         - RestApiId: !Ref ApiGateway
           StageName: !Ref ParameterApiGatewayStageName
@@ -93,9 +91,8 @@ Resources:
         Limit: 1000
         Period: MONTH
       Throttle:
-        BurstLimit: 20
-        RateLimit: 10
-      UsagePlanName: !Join ["", [{"Ref": "AWS::StackName"}, "-usage-plan"]]  
+        BurstLimit: 200
+        RateLimit: 100
 
   #------------ Api Gateway - Usage Plan Key ------------#
   UsagePlanKey:
