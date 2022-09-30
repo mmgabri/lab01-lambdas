@@ -1,13 +1,15 @@
-package mmgabri.lambda;
+package com.mmgabri.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.gson.Gson;
-import mmgabri.adapter.AuthServiceImpl;
-import mmgabri.application.UseCase;
-import mmgabri.application.UseCaseImpl;
+import com.mmgabri.adapter.files.S3FileServiceImpl;
+import com.mmgabri.application.UseCase;
+import com.mmgabri.application.UseCaseImpl;
+import com.mmgabri.services.ParseBodyServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,10 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
     private final UseCase<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> useCase;
 
     public Handler() {
-        useCase = new UseCaseImpl(new Gson());
+        useCase = new UseCaseImpl(
+                new ParseBodyServiceImpl(),
+                new Gson(),
+                new S3FileServiceImpl(AmazonS3ClientBuilder.standard().build(), "mmgabri-aws3-lab01"));
     }
 
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent event, final Context context) {

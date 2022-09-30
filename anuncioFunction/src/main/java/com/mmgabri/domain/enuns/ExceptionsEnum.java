@@ -1,4 +1,4 @@
-package mmgabri.domain.enuns;
+package com.mmgabri.domain.enuns;
 
 public enum ExceptionsEnum {
     USER_NAME_EXISTS("UsernameExistsException", "Email existente, tente outro email"),

@@ -1,4 +1,4 @@
-package mmgabri.domain.enuns;
+package com.mmgabri.domain.enuns;
 
 public enum ResourcesEnum {
     SIGNUP("/signup"),
