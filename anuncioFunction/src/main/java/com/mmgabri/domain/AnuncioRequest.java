@@ -11,15 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 public class AnuncioRequest {
-	private String id;
-	private String userId;
-	private TipoAnuncioEnum tipo;
-	private CategoriaEnum categoria;
-	private StatusAnuncioEnum status;
-	private String titulo;
-	private String descricao;
-	private String valor;
-	private String cep;
-	private List<String> imagens;
+	private Anuncio anuncio;
 	private List<File> files;
 }

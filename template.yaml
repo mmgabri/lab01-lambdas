@@ -108,7 +108,55 @@ Resources:
       KeyType: API_KEY
       UsagePlanId: !Ref UsagePlan
 
-  
+    #------------ Lambda Function - User ------------#
+  UserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref ParameterLambdaUserName
+      CodeUri: userFunction
+      Handler: mmgabri.lambda.Handler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          CLIENT_ID: !Ref ParameterClientId
+          USER_POOL: !Ref ParameterUserPool
+          ACESS_KEY: !Ref ParameterAcessKey
+          SECRET_KEY: !Ref ParameterSecretKey
+      Events:
+        Signup:
+          Type: Api
+          Properties:
+            Path: /users/signup
+            RestApiId: !Ref ApiGateway
+            Method: post
+            Auth:
+              Authorizer: NONE
+        ConfirmSignup:
+          Type: Api
+          Properties:
+            Path: /users/confirmsignup
+            RestApiId: !Ref ApiGateway
+            Method: post
+            Auth:
+              Authorizer: NONE
+        Signin:
+          Type: Api
+          Properties:
+            Path: /users/signin
+            RestApiId: !Ref ApiGateway
+            Method: post
+            Auth:
+              Authorizer: NONE
+        Signout:
+          Type: Api
+          Properties:
+            Path: /users/signout
+            RestApiId: !Ref ApiGateway
+            Method: post
+
   #------------ Lambda Function - Anuncio ------------#
   AnuncioFunction:
     Type: AWS::Serverless::Function
@@ -128,5 +176,11 @@ Resources:
           Type: Api
           Properties:
             Method: POST
+            Path: '/anuncios'
+            RestApiId: !Ref ApiGateway
+        GetAll:
+          Type: Api
+          Properties:
+            Method: GET
             Path: '/anuncios'
             RestApiId: !Ref ApiGateway

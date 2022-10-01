@@ -19,9 +19,9 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     public Handler() {
         useCase = new UseCaseImpl(
-                new ParseBodyServiceImpl(),
-                new Gson(),
-                new S3FileServiceImpl(AmazonS3ClientBuilder.standard().build(), "mmgabri-aws3-lab01"));
+                new S3FileServiceImpl(AmazonS3ClientBuilder.standard().build(), "mmgabri-aws3-lab01"),
+                new ParseBodyServiceImpl(new Gson()),
+                new Gson());
     }
 
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent event, final Context context) {

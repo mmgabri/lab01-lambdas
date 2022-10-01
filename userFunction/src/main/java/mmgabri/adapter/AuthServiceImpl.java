@@ -106,11 +106,20 @@ public class AuthServiceImpl implements AuthService {
         try {
             AdminInitiateAuthResult authResult = clientCognito.adminInitiateAuth(authRequest);
             AuthenticationResultType resultType = authResult.getAuthenticationResult();
-            return new SigninResponse(
-                    resultType.getIdToken(),
-                    resultType.getAccessToken(),
-                    resultType.getRefreshToken(),
-                    "Successfully signin");
+
+            UserDomain user = getUser(resultType.getAccessToken());
+
+            SigninResponse signinResponse = new SigninResponse();
+            signinResponse.setId(user.getId());
+            signinResponse.setEmail(user.getEmail());
+            signinResponse.setUserName(user.getUserName());
+            signinResponse.setAccessToken(resultType.getAccessToken());
+            signinResponse.setIdToken(resultType.getIdToken());
+            signinResponse.setRefreshToken(resultType.getRefreshToken());
+            signinResponse.setMessage("Successfully signin");
+
+            return signinResponse;
+
         } catch (NotAuthorizedException e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(NOT_AUTHORIZED.getDescricao());
@@ -118,5 +127,30 @@ public class AuthServiceImpl implements AuthService {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(ERROR_SYSTEM.getDescricao());
         }
+    }
+
+    @Override
+    public UserDomain getUser(String acessToken) {
+        GetUserRequest user = new GetUserRequest();
+        user.setAccessToken(acessToken);
+        GetUserResult userResult = clientCognito.getUser(user);
+
+        UserDomain userDomain = new UserDomain();
+
+        for (int i = 0; i < userResult.getUserAttributes().size(); i++) {
+            switch (userResult.getUserAttributes().get(i).getName()) {
+                case "sub" :
+                    userDomain.setId(userResult.getUserAttributes().get(i).getValue());
+                    break;
+                case "email" :
+                    userDomain.setEmail(userResult.getUserAttributes().get(i).getValue());
+                    break;
+                case "name" :
+                    userDomain.setUserName(userResult.getUserAttributes().get(i).getValue());
+                    break;
+            }
+        }
+
+        return userDomain;
     }
 }

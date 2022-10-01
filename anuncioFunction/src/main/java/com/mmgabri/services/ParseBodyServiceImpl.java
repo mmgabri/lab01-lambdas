@@ -2,12 +2,12 @@ package com.mmgabri.services;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.mmgabri.domain.Anuncio;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.File;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import com.mmgabri.domain.enuns.CategoriaEnum;
-import com.mmgabri.domain.enuns.StatusAnuncioEnum;
-import com.mmgabri.domain.enuns.TipoAnuncioEnum;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@AllArgsConstructor
 public class ParseBodyServiceImpl {
     private static final Logger logger = LoggerFactory.getLogger(ParseBodyServiceImpl.class);
+    private final Gson gson;
 
     @SneakyThrows
     public AnuncioRequest parse(String body, Map<String, String> headers) {
@@ -69,32 +71,8 @@ public class ParseBodyServiceImpl {
                     case "file":
                         files.add(buildFile(out, inputFilename));
                         break;
-                    case "id":
-                        request.setId(out.toString());
-                        break;
-                    case "userId":
-                        request.setUserId(out.toString());
-                        break;
-                    case "tipo":
-                        request.setTipo(TipoAnuncioEnum.valueOf(out.toString()));
-                        break;
-                    case "categoria":
-                        request.setCategoria(CategoriaEnum.valueOf(out.toString()));
-                        break;
-                    case "status":
-                        request.setStatus(StatusAnuncioEnum.valueOf(out.toString()));
-                        break;
-                    case "titulo":
-                        request.setTitulo(out.toString());
-                        break;
-                    case "descricao":
-                        request.setDescricao(out.toString());
-                        break;
-                    case "valor":
-                        request.setValor(out.toString());
-                        break;
-                    case "cep":
-                        request.setCep(out.toString());
+                    case "anuncio":
+                        request.setAnuncio(gson.fromJson(out.toString(), Anuncio.class));
                         break;
                     default:
                         logger.info("Input Field Name Unknow");

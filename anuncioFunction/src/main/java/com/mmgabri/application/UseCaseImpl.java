@@ -18,9 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Logger logger = LoggerFactory.getLogger(UseCaseImpl.class);
+    private final S3FileServiceImpl fileService;
     private final ParseBodyServiceImpl parseService;
     private final Gson gson;
-    private final S3FileServiceImpl fileService;
+
 
     @Override
     public APIGatewayProxyResponseEvent execute(APIGatewayProxyRequestEvent event) {
@@ -42,6 +43,7 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                 }
             case "GET":
                 System.out.println("GET");
+                return builderResponse(200, gson.toJson(builderBodyError("Sucess!")));
             default:
                 return null;
         }
