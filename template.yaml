@@ -206,7 +206,7 @@ Resources:
             Method: GET
             Path: '/anuncios/tipo/{tipo}'
             RestApiId: !Ref ApiGateway
-        GetBycATEGORIA:
+        GetByCategoria:
           Type: Api
           Properties:
             Method: GET
