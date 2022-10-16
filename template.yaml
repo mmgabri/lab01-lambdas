@@ -31,10 +31,10 @@ Parameters:
   ParameterTableNameAnuncio:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
-    Default: anuncios
+    Default: anuncio
   ParameterTableNameChat:
     Type: String
-    Default: chats
+    Default: chat
   ParameterLambdaAnuncioName:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
@@ -54,8 +54,17 @@ Parameters:
   ParameterApiGatewayStageName:
     Type: String
     Default: "Prod"
+  ParameterBucketName:
+    Type: String
+    Default: 'mmgabri-aws3-lab01-images'  
 
 Resources:
+
+#------------  Bucket S3 ------------#
+  InputS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ParameterBucketName
   #------------  Api Gateway ------------#
   ApiGateway:
     Type: AWS::Serverless::Api
@@ -108,7 +117,7 @@ Resources:
       KeyType: API_KEY
       UsagePlanId: !Ref UsagePlan
 
-    #------------ Lambda Function - User ------------#
+  #------------ Lambda Function - User ------------#
   UserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -171,6 +180,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref ParameterTableNameAnuncio
+          BUCKET_NAME: !Ref ParameterBucketName
       Events:
         Create:
           Type: Api
@@ -184,3 +194,69 @@ Resources:
             Method: GET
             Path: '/anuncios'
             RestApiId: !Ref ApiGateway
+        GetByUser:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: '/anuncios/user/{userId}'
+            RestApiId: !Ref ApiGateway
+        GetByTipo:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: '/anuncios/tipo/{tipo}'
+            RestApiId: !Ref ApiGateway
+        GetBycATEGORIA:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: '/anuncios/categoria/{categoria}'
+            RestApiId: !Ref ApiGateway
+
+  #Table DynamoDB Anuncio
+  TableAnuncio: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "pk_user"
+          AttributeType: "S"
+        - AttributeName: "sk_anuncio"
+          AttributeType: "S"
+        - AttributeName: "tipo_pk_index"
+          AttributeType: "S"
+        - AttributeName: "categoria_pk_index"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "pk_user"
+          KeyType: "HASH"
+        - AttributeName: "sk_anuncio"
+          KeyType: "RANGE"    
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: !Ref ParameterTableNameAnuncio
+
+      GlobalSecondaryIndexes: 
+        - IndexName: "GSI_TIPO"
+          KeySchema: 
+            - AttributeName: "tipo_pk_index"
+              KeyType: "HASH"
+            - AttributeName: "sk_anuncio"
+              KeyType: "RANGE"
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+
+        - IndexName: "GSI_CATEGORIA"
+          KeySchema: 
+            - AttributeName: "categoria_pk_index"
+              KeyType: "HASH"
+            - AttributeName: "sk_anuncio"
+              KeyType: "RANGE"
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"

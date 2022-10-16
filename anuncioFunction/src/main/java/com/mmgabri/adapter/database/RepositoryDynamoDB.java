@@ -1,86 +1,118 @@
 package com.mmgabri.adapter.database;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.mmgabri.domain.AnuncioRequest;
-import com.mmgabri.domain.AnuncioResponse;
-import com.mmgabri.domain.entity.AnuncioDocumentDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.mmgabri.domain.entity.AnuncioEntity;
+import com.mmgabri.exceptions.BusinessException;
 import com.mmgabri.services.Repository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
-import static com.fasterxml.uuid.Generators.nameBasedGenerator;
+import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 
 @AllArgsConstructor
-public class RepoDynamoDB implements Repository<AnuncioRequest, AnuncioResponse> {
-    private static final Logger logger = LoggerFactory.getLogger(RepoDynamoDB.class);
+public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryDynamoDB.class);
     private final DynamoDBMapper mapper;
 
     @Override
-    public void save(AnuncioRequest request) {
-        System.out.println("save");
-
-        String createdAt = LocalDateTime.now().toString();
-        String anuncioId = nameBasedGenerator().generate(createdAt).toString();
-
-        AnuncioDocumentDB document = AnuncioDocumentDB.builder()
-                .id(anuncioId)
-                .cep(request.getAnuncio().getCep())
-                .descricao(request.getAnuncio().getDescricao())
-                .categoria(request.getAnuncio().getCategoria().toString())
-                .tipo(request.getAnuncio().getTipo().toString())
-                .status("ATIVO")
-                .images(request.getAnuncio().getImagens())
-                .titulo(request.getAnuncio().getTitulo())
-                .createdAt(createdAt)
-                .build();
-
-        AnuncioEntity anuncio = AnuncioEntity.builder()
-                .user("USER#" + request.getAnuncio().getUserId())
-                .anuncio("TIMESTAMP#" + createdAt + "#ID_ANUNCIO#" + anuncioId)
-                .tipo(request.getAnuncio().getTipo().toString())
-                .categoria(request.getAnuncio().getCategoria().toString())
-                .dados(document)
-                .build();
-
+    public void save(AnuncioEntity anuncio) {
         try {
             mapper.save(anuncio);
         } catch (Exception e) {
-            logger.error("Erro DynamoDb - " + e);
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (save) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
         }
     }
 
     @Override
-    public void delete(AnuncioRequest request) {
+    public void delete(AnuncioEntity anuncio) {
 
     }
 
     @Override
-    public void update(AnuncioRequest request) {
+    public void update(AnuncioEntity anuncio) {
 
     }
 
     @Override
-    public List<AnuncioResponse> listAll() {
-        return null;
+    public List<AnuncioEntity> listAll() {
+
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS("ATIVO"));
+
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("status_anuncio = :value1")
+                .withExpressionAttributeValues(eav);
+
+        try {
+            return mapper.scan(AnuncioEntity.class, scanExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (scan) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
     }
 
     @Override
-    public List<AnuncioResponse> listByUser(String userId) {
-        return null;
+    public List<AnuncioEntity> listByUser(String userId) {
+
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS("USER#" + userId));
+
+        DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
+                .withConsistentRead(false)
+                .withKeyConditionExpression("pk_user = :value1")
+                .withExpressionAttributeValues(eav);
+
+        try {
+            return mapper.query(AnuncioEntity.class, queryExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
     }
 
     @Override
-    public List<AnuncioResponse> listByTipo(String tipo) {
-        return null;
+    public List<AnuncioEntity> listByTipo(String tipo) {
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS(tipo));
+
+        DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
+                .withIndexName("GSI_TIPO")
+                .withConsistentRead(false)
+                .withKeyConditionExpression("tipo_pk_index = :value1")
+                .withExpressionAttributeValues(eav);
+
+        try {
+            return mapper.query(AnuncioEntity.class, queryExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query GSI_TIPO) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
     }
 
     @Override
-    public List<AnuncioResponse> listByCategoria(String categoria) {
-        return null;
+    public List<AnuncioEntity> listByCategoria(String categoria) {
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS(categoria));
+
+        DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
+                .withIndexName("GSI_CATEGORIA")
+                .withConsistentRead(false)
+                .withKeyConditionExpression("categoria_pk_index = :value1")
+                .withExpressionAttributeValues(eav);
+
+        try {
+            return mapper.query(AnuncioEntity.class, queryExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query GSI_CATEGORIA) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
     }
 }

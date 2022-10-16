@@ -3,25 +3,24 @@ package com.mmgabri.application;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
-import com.mmgabri.adapter.files.S3FileServiceImpl;
 import com.mmgabri.domain.AnuncioRequest;
+import com.mmgabri.domain.AnuncioResponse;
 import com.mmgabri.domain.BodyError;
-import com.mmgabri.exceptions.RequestDeniedException;
+import com.mmgabri.exceptions.BusinessException;
+import com.mmgabri.services.AnuncioServiceImpl;
 import com.mmgabri.services.ParseBodyServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Logger logger = LoggerFactory.getLogger(UseCaseImpl.class);
-    private final S3FileServiceImpl fileService;
     private final ParseBodyServiceImpl parseService;
+    private final AnuncioServiceImpl service;
     private final Gson gson;
-
 
     @Override
     public APIGatewayProxyResponseEvent execute(APIGatewayProxyRequestEvent event) {
@@ -33,17 +32,47 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                     case "/anuncios":
                         try {
                             AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
-                            List<URI> lisUri = fileService.uploadFile(request.getFiles());
+                            service.create(request);
                             return builderResponse(200, gson.toJson(builderBodyError("Sucess!")));
-                        } catch (RequestDeniedException e) {
+                        } catch (BusinessException e) {
                             return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                         }
                     default:
                         return null;
                 }
             case "GET":
-                System.out.println("GET");
-                return builderResponse(200, gson.toJson(builderBodyError("Sucess!")));
+                switch (event.getResource()) {
+                    case "anuncios":
+                        try {
+                            List<AnuncioResponse> resp = service.listAll();
+                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                        } catch (BusinessException e) {
+                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                        }
+                    case "/anuncios/user/{userId}":
+                        try {
+                            List<AnuncioResponse> resp = service.listByUser(event.getPathParameters().get("userId"));
+                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                        } catch (BusinessException e) {
+                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                        }
+                    case "/anuncios/tipo/{tipo}":
+                        try {
+                            List<AnuncioResponse> resp = service.listByTipo(event.getPathParameters().get("tipo"));
+                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                        } catch (BusinessException e) {
+                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                        }
+                    case "/anuncios/categoria/{categoria}":
+                        try {
+                            List<AnuncioResponse> resp = service.listByCategoria(event.getPathParameters().get("categoria"));
+                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                        } catch (BusinessException e) {
+                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                        }
+                    default:
+                        return null;
+                }
             default:
                 return null;
         }

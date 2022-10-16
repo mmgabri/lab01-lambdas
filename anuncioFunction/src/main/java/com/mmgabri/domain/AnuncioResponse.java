@@ -18,15 +18,15 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 public class AnuncioResponse {
-	private Integer id;
+	private String id;
 	private String userId;
 	private TipoAnuncioEnum tipo;
 	private CategoriaEnum categoria;
 	private StatusAnuncioEnum status;
 	private String titulo;
 	private String descricao;
-	private double valor;
+	private String valor;
 	private String cep;
-	private LocalDateTime dataHoraCriacao;
-	private List imagens;
+	private String dataHoraCriacao;
+	private List<String> imagens;
 }

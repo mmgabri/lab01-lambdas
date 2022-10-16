@@ -21,12 +21,12 @@ public class S3FileServiceImpl implements FileService {
     private static final Logger logger = LoggerFactory.getLogger(S3FileServiceImpl.class);
 
     @Override
-    public List<URI> uploadFile(List<File> files) {
-        List<URI> listUri = new ArrayList<>();
+    public List<String> uploadFile(List<File> files) {
+        List<String> listUri = new ArrayList<>();
 
         for (File f : files) {
             URI uri = upload(f);
-            listUri.add(uri);
+            listUri.add(uri.toString());
         }
         return listUri;
     }

@@ -6,6 +6,6 @@ import java.net.URI;
 import java.util.List;
 
 public interface FileService{
-    List<URI> uploadFile(List<File> files);
+    List<String> uploadFile(List<File> files);
     void deleteFile(String filePath);
 }
