@@ -42,31 +42,31 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                 }
             case "GET":
                 switch (event.getResource()) {
-                    case "anuncios":
+                    case "/anuncios":
                         try {
                             List<AnuncioResponse> resp = service.listAll();
-                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                            return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
                             return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                         }
                     case "/anuncios/user/{userId}":
                         try {
                             List<AnuncioResponse> resp = service.listByUser(event.getPathParameters().get("userId"));
-                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                            return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
                             return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                         }
                     case "/anuncios/tipo/{tipo}":
                         try {
                             List<AnuncioResponse> resp = service.listByTipo(event.getPathParameters().get("tipo"));
-                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                            return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
                             return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                         }
                     case "/anuncios/categoria/{categoria}":
                         try {
                             List<AnuncioResponse> resp = service.listByCategoria(event.getPathParameters().get("categoria"));
-                            return builderResponse(200, gson.toJson(builderResponse(200, gson.toJson(resp))));
+                            return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
                             return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
                         }

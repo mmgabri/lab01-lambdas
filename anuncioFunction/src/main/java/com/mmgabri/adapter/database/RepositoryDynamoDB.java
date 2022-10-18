@@ -33,13 +33,38 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
 
     @Override
     public void delete(AnuncioEntity anuncio) {
+        List<AnuncioEntity> anuncios = getItem(anuncio.getDados().getUserId(), anuncio.getDados().getId());
 
+        if (anuncios.size() > 0){
+            mapper.delete(anuncios.get(0));
+        }
     }
+
 
     @Override
     public void update(AnuncioEntity anuncio) {
 
     }
+
+    @Override
+    public List<AnuncioEntity> getItem(String hashKey, String rangeKey) {
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS(hashKey));
+        eav.put(":value2", new AttributeValue().withS(rangeKey));
+
+        DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
+                .withConsistentRead(false)
+                .withKeyConditionExpression("pk_user = :value1 and contains(sk_anuncio, :value2)")
+                .withExpressionAttributeValues(eav);
+
+        try {
+            return mapper.query(AnuncioEntity.class, queryExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
+    }
+
 
     @Override
     public List<AnuncioEntity> listAll() {

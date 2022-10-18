@@ -35,7 +35,7 @@ public class Mapper {
                 .build();
 
         return AnuncioEntity.builder()
-                .user("USER#" + request.getAnuncio().getUserId())
+                .user(request.getAnuncio().getUserId())
                 .anuncio("TIMESTAMP#" + createdAt + "#ID_ANUNCIO#" + anuncioId)
                 .tipo(request.getAnuncio().getTipo().toString())
                 .categoria(request.getAnuncio().getCategoria().toString())
@@ -59,7 +59,7 @@ public class Mapper {
                     .imagens(item.getDados().getImages())
                     .dataHoraCriacao(item.getDados().getCreatedAt())
                     .userId(item.getDados().getUserId())
-                    .valor(item.getDados().getValor())
+                    .valor(Integer.parseInt(item.getDados().getValor()))
                     .build();
 
             resp.add(i);

@@ -32,9 +32,7 @@ const HomeScreen = ({ navigation }) => {
     apiAnuncio.get('')
       .then((response) => {
         console.log("Response:" , response.data)
-        var objeto = JSON.parse(response.data.body);
-        console.log("objeto:" , objeto)
-        setAnuncio(JSON.parse(response.data.body))
+        setAnuncio(response.data)
         setRefreshing(false)
       })
       .catch((error) => {

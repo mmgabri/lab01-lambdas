@@ -9,5 +9,4 @@ const convertDateTimezoneAmericaSaoPaulo = (message) => {
     return date.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss.SSS')
 
   }
-
 export {formatValor, convertDateTimezoneAmericaSaoPaulo}

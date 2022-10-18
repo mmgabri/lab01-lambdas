@@ -25,7 +25,7 @@ public class AnuncioResponse {
 	private StatusAnuncioEnum status;
 	private String titulo;
 	private String descricao;
-	private String valor;
+	private int valor;
 	private String cep;
 	private String dataHoraCriacao;
 	private List<String> imagens;
