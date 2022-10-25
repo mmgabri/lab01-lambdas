@@ -17,19 +17,6 @@ const removeUserStorage = async () => {
     await AS_User.removeItem(LOGGED_USER)
 }
 
-const setTokenStorage = (valor) => {
-    console.log('set token:' , valor)
-    AS_Token.setItem(TOKEN, valor);
-}
-
-const getTokenStorage = async () => {
-    return await AS_Token.getItem(TOKEN)
-}
-
-const removeTokenStorage = async () => {
-    await AS_Token.removeItem(TOKEN)
-}
-
 const clearStorage = async () => {
     AS_Token.clear
     AS_User.clear
@@ -41,8 +28,5 @@ export {
     setUserStorage,
     getUserStorage,
     removeUserStorage,
-    setTokenStorage,
-    getTokenStorage,
-    removeTokenStorage,
     clearStorage
 };

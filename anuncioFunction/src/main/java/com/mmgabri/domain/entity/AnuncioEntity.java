@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@DynamoDBTable(tableName = "anuncios")
+@DynamoDBTable(tableName = "anuncio")
 public class AnuncioEntity {
     @DynamoDBHashKey(attributeName = "pk_user")
     private String user;

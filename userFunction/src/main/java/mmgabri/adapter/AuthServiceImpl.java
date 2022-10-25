@@ -9,8 +9,12 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.*;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import mmgabri.domain.*;
+import mmgabri.exceptions.ConfirmationCodeInvalildException;
 import mmgabri.exceptions.RequestDeniedException;
+import mmgabri.exceptions.InvalidPasswordException;
+import mmgabri.exceptions.UserAlreadyExistsException;
 import mmgabri.lambda.Handler;
 import mmgabri.services.AuthService;
 import org.slf4j.Logger;
@@ -63,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
             return new SignupResponse("Successfully signup", result.getUserSub());
         } catch (UsernameExistsException e) {
             logger.error("Erro client Cognito: " + e.getErrorMessage());
-            throw new RequestDeniedException(USER_NAME_EXISTS.getDescricao());
+            throw new UserAlreadyExistsException(USER_NAME_EXISTS.getDescricao());
         } catch (Exception e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(ERROR_SYSTEM.getDescricao());
@@ -80,10 +84,10 @@ public class AuthServiceImpl implements AuthService {
             return new ConfirmSignupResponse("Successfully confirm signup");
         } catch (CodeMismatchException e) {
             logger.error("Erro client Cognito: " + e.getCause());
-            throw new RequestDeniedException(CODE_MISMATCH.getDescricao());
+            throw new ConfirmationCodeInvalildException(CODE_MISMATCH.getDescricao());
         } catch (ExpiredCodeException e) {
             logger.error("Erro client Cognito: " + e.getCause());
-            throw new RequestDeniedException(EXPIRED_CODE.getDescricao());
+            throw new ConfirmationCodeInvalildException(EXPIRED_CODE.getDescricao());
         } catch (Exception e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(ERROR_SYSTEM.getDescricao());
@@ -91,6 +95,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @SneakyThrows
     public SigninResponse signin(SigninRequest request) {
 
         Map<String, String> authParams = new LinkedHashMap<String, String>() {{
@@ -122,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
 
         } catch (NotAuthorizedException e) {
             logger.error("Erro client Cognito: " + e.getCause());
-            throw new RequestDeniedException(NOT_AUTHORIZED.getDescricao());
+            throw new InvalidPasswordException(NOT_AUTHORIZED.getDescricao());
         } catch (Exception e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(ERROR_SYSTEM.getDescricao());

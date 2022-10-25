@@ -1,37 +1,52 @@
 import React, { createContext, useState, useEffect, useContext, useRef, } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { showMessage, hideMessage } from "react-native-flash-message";
+import { StyleSheet, View, Text, StatusBar, LogBox } from 'react-native';
+import * as Animatable from 'react-native-animatable';
+import Button from '../components/Button';
+import ButtonDisable from '../components/ButtonDisable';
+import { useTheme } from 'react-native-paper';
+import FieldForm from '../components/FieldForm';
 import AwesomeLoading from 'react-native-awesome-loading';
 import { decodeMessage } from '../services/decodeMessage'
 import { apiUser, apiAnuncio, apiChat } from '../services/api';
-import DropdownAlert from 'react-native-dropdownalert';
 import { setUserStorage, getUserStorage, removeUserStorage } from '../services/localStorageService'
+import stylesCommon from '../components/stylesCommon'
+import { showMessage, hideMessage } from "react-native-flash-message";
+
+//LogBox.ignoreAllLogs();
+
+console.disableYellowBox = true;
+console.hideMessage = true;
 
 const AuthContext = createContext({
-    isAuthenticated: false,
-    loading: false, 
-    token: "",
-    user: {}
+//    isAuthenticated: false,
+//    loading: false,
+//    token: "",
+    //user: {}
 });
 
+
 const AuthProvider = ({ children, navigation }) => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState({});
+    const [userEmail, setUserEmail] = useState('');
+    const [userPassword, setUserPassword] = useState('');
+    const [confirmationCode, setConfirmationCode] = useState('');
+    const [enableButton, setEnableButton] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const [confirmationCodeInvalid, setconfirmationCodeInvalid] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [queueSize, setQueueSize] = useState(0);
-    let dropDownAlertRef = useRef(null);
-
+    const [isConfirmSignup, setConfirmSignup] = useState(false);
+    const { colors } = useTheme();
 
     useEffect(() => {
         console.log('---- useEffect - auth ----')
+    //    LogBox.ignoreAllLogs()
         apiUser.defaults.timeout = 25000;
         apiAnuncio.defaults.timeout = 25000;
         apiChat.defaults.timeout = 25000;
-     //   defineInterceptorApiAnuncio()
-     //   defineInterceptorApiChat()
         const loadStorageData = async () => {
             const storageUser = await getUserStorage();
-            //console.info('Usuário obtido do storage -->', storageUser)
+       //     console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
                 setUser(storageUser)
                 setIsAuthenticated(true)
@@ -44,115 +59,107 @@ const AuthProvider = ({ children, navigation }) => {
         setIsLoading(value)
     }
 
-    async function signUp(email, password, name) {
-        console.log('---- Entrou no signUp ----')
-      //  setIsLoading(true)
-
-        try {
-            const response = await apiUser.post('/signup', { email: email, password: password, name: name, role: ['admin'] })
-            console.log('Retorno da api signin:', response.data)
-            signIn(email, password)
-        } catch (error) {
-            log.error('Erro na api signup:', error)
-            _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-            setIsLoading(false)
+    const changeConfirmationCode = (val) => {
+        console.log('----------changeConfirmationCode------', val)
+        setConfirmationCode(val);
+        console.log('confirmationCode:', confirmationCode)
+        setconfirmationCodeInvalid(false)
+        if (val.length == 6) {
+            setEnableButton(true)
+        } else {
+            setEnableButton(false)
         }
     }
 
+    async function signUp(email, password, name) {
+        console.log('---- Entrou no signUp ----')
+        setIsLoading(true)
+
+        try {
+            const response = await apiUser.post('/signup', { email: email, password: password, name: name })
+            console.log('Retorno da api signin:', response.data)
+            setIsLoading(false)
+            setUserEmail(email)
+            setUserPassword(password)
+            setconfirmationCodeInvalid(false)
+            setConfirmSignup(true)
+            setConfirmationCode('')
+            setEnableButton(false)
+         //   _showAlert('success', 'Bem vindo !', '', 3000);
+        } catch (error) {
+            console.error('Erro na api signup:', error)
+            setIsLoading(false)
+            const statusCode = error.response?.status
+            _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 5000);
+
+        }
+    }
+
+    const confirmSignup = () => {
+        console.log('---- Entrou no confirmSignUp ----', userEmail)
+        setIsLoading(true)
+
+        apiUser.post('/confirmsignup', { email: userEmail, confirmationCode: confirmationCode })
+            .then((response) => {
+                console.log('Retorno da api confirmSignUp:', response.data)
+                setConfirmSignup(false)
+                setconfirmationCodeInvalid(false)
+                signIn(userEmail, userPassword)
+            })
+            .catch((error) => {
+                setIsLoading(false)
+                setConfirmSignup(true)
+                setconfirmationCodeInvalid(true)
+                console.error('Erro na api signup:', error)
+                const statusCode = error.response?.status
+                _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 5000);
+            });
+    }
+
+    const cancelConfirmSignup = () => {
+        console.log('---- Entrou no cancelConfirmSignup ----')
+        setIsLoading(false)
+        setConfirmSignup(false)
+    }
+
+
     function signIn(email, password) {
         console.log('---- Entrou no signIn ----')
-       // setIsLoading(true)
+        setIsLoading(true)
 
         apiUser.post('/signin', { email: email, password: password })
             .then((response) => {
-                _showAlert('success', 'Bem vindo !', '', 3000);
-                setUser(response.data)
-                setUserStorage(response.data)
-                console.log('Retorno da api signin:', response)
+
+                let userLogged = ({
+                    id: response.data.id,
+                    userName: response.data.userName,
+                    email: response.data.email,
+                    idToken: response.data.idToken,
+                    accessToken: response.data.accessToken,
+                    refreshToken: response.data.refreshToken
+                })
+
+                console.log('Signin - userLogged:', userLogged)
+
+                setUser(userLogged)
+                setUserStorage(userLogged)
+
                 apiUser.defaults.headers.authorization = response.data.idToken;
-                //apiChat.defaults.headers.authorization = `${response.data.type} ${response.data.token}`;
-                apiAnuncio.defaults.headers.authorization = response.data.idToken;
+                apiAnuncio.defaults.headers.Authorization = response.data.idToken;
+                apiChat.defaults.headers.authorization = response.data.idToken;
+                _showAlert('success', 'Bem vindo !', '', 3000);
                 setIsAuthenticated(true)
                 setIsLoading(false)
             })
             .catch((error) => {
-                _showAlert('error', 'Ooops!', decodeMessage(error.response.status), 7000);
-                console.error('Erro na api signin:', error.response.status)
+                console.error('Erro na api signin:', error)
                 setIsLoading(false)
+                setConfirmSignup(false)
+                setIsLoading(false)
+                const statusCode = error.response?.status
+                _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 5000);
             });
     }
-
-    function defineInterceptorApiAnuncio() {
-        console.log('--defineInterceptorApiAnuncio--')
-        apiAnuncio.interceptors.response.use(
-            (response) => {
-                return response;
-            },
-            async function (error) {
-                const originalRequest = error.config;
-                const status = error.response?.status
-                if (status === 401 && !originalRequest._retry) {
-                    originalRequest._retry = true;
-                    await refreshToken(error);
-                    const userStorage = await getUserStorage();
-                    originalRequest.headers.authorization = userStorage.type + ' ' + userStorage.token
-                    return apiAnuncio(originalRequest);
-                }
-                return Promise.reject(error);
-            }
-        );
-    }
-
-    function defineInterceptorApiChat() {
-        apiChat.interceptors.response.use(
-            (response) => {
-                return response;
-            },
-            async function (error) {
-                const originalRequest = error.config;
-                const status = error.response?.status
-                if (status === 401 && !originalRequest._retry) {
-                    originalRequest._retry = true;
-                    await refreshToken(error);
-                    const userStorage = await getUserStorage();
-                    originalRequest.headers.authorization = userStorage.type + ' ' + userStorage.token
-                    return apiChat(originalRequest);
-                }
-                return Promise.reject(error);
-            }
-        );
-    }
-
-    async function refreshToken(error) {
-        console.log('--- refreshToken ---')
-        const userStorage = await getUserStorage();
-        return new Promise((resolve, reject) => {
-            try {
-                apiUser.defaults.headers.authorization = `${userStorage.type} ${userStorage.token}`;
-                apiAnuncio.defaults.headers.authorization = `${userStorage.type} ${userStorage.token}`;
-                apiChat.defaults.headers.authorization = `${userStorage.type} ${userStorage.token}`;
-                apiUser.post('/users/refreshtoken', { refreshToken: userStorage.refreshToken })
-                    .then(async (response) => {
-                        const userAux = userStorage;
-                        userAux.token = response.data.accessToken
-                        userAux.refreshToken = response.data.refreshToken
-                        setUserStorage(userAux)
-                        apiUser.defaults.headers.authorization = `${userAux.type} ${userAux.token}`;
-                        apiAnuncio.defaults.headers.authorization = `${userAux.type} ${userAux.token}`;
-                        apiChat.defaults.headers.authorization = `${userAux.type} ${userAux.token}`;
-                        return resolve(response);
-                    })
-                    .catch((err) => {
-                        console.error('Erro api refresh token:', err)
-                        setIsAuthenticated(false)
-                        return reject(error);
-                    });
-            } catch (err) {
-                return reject(err);
-            }
-        });
-    };
-
 
     async function signOut() {
         console.log('---- Entrou no signOut ----', user)
@@ -163,33 +170,15 @@ const AuthProvider = ({ children, navigation }) => {
 
 
     function _showAlert(type, title, message, interval) {
-        console.log('_showAlertQueue')
+        console.log('_showAlert')
 
-     //   showMessage({
-     //       message: title,
-     //       description: message,
-     //       type: type,
-    //       // animationDuration: interval
-    //      });
+        showMessage({
+            message: title,
+            description: message,
+            type: type,
+           duration: interval
+          });
 
-
-
-        dropDownAlertRef.alertWithType(type, title, message, {}, interval)
-        //     dropDownAlertRef.alertWithType(type, title, message)
-
-    };
-
-    const _onClose = (data) => {
-        _updateQueueSize();
-    };
-    const _onCancel = (data) => {
-        _updateQueueSize();
-    };
-    const _onTap = (data) => {
-        _updateQueueSize();
-    };
-    const _updateQueueSize = () => {
-        setQueueSize(dropDownAlertRef.getQueueSize());
     };
 
     return (
@@ -201,33 +190,95 @@ const AuthProvider = ({ children, navigation }) => {
 
             :
 
-            <AuthContext.Provider
-                value={{
-                    isAuthenticated,
-                    user,
-                    isLoading,
-                    setLoading,
-                    signIn,
-                    signUp,
-                    signOut,
-                    _showAlert
-                }}>
-                {children}
-                <DropdownAlert
-                    ref={(ref) => {
-                        if (ref) {
-                            dropDownAlertRef = ref;
+            isConfirmSignup ?
+
+                <View style={stylesCommon.container}>
+                    <StatusBar backgroundColor='#009387' barStyle="light-content" />
+                    <Animatable.View
+                        animation="fadeInUpBig"
+                        style={[stylesCommon.footer, {
+                            backgroundColor: colors.background
+                        }]}
+                    >
+                        <FieldForm
+                            text={'Confirme o código enviado no seu email'}
+                            onFocus={() => { setIsFocused(true) }}
+                            isFocused={isFocused}
+                            placeholder={'digite o código'}
+                            multiline={false}
+                            numberOfLines={1}
+                            value={confirmationCode}
+                            onChangeText={changeConfirmationCode}
+                        />
+                        {confirmationCodeInvalid ?
+                            <>
+                               <Animatable.View animation="fadeInLeft" duration={500}>
+                                    <Text style={stylesCommon.infoMsg}></Text>
+                                </Animatable.View>
+                                {enableButton ?
+                                    <Button
+                                        text={'Confirmar'}
+                                        onClick={confirmSignup}
+                                        top={15}
+                                    />
+                                    :
+                                    <ButtonDisable
+                                        text={'Confirmar'}
+                                        onClick={confirmSignup}
+                                        top={15}
+                                    />
+                                }
+
+                                <Button
+                                    text={'Cancelar'}
+                                    onClick={cancelConfirmSignup}
+                                    top={15}
+                                />
+                            </>
+                            :
+                            <>
+                                <Animatable.View animation="fadeInLeft" duration={500}>
+                                    <Text style={stylesCommon.infoMsg}></Text>
+                                </Animatable.View>
+                                {enableButton ?
+                                    <Button
+                                        text={'Confirmar'}
+                                        onClick={confirmSignup}
+                                        top={15}
+                                    />
+                                    :
+                                    <ButtonDisable
+                                        text={'Confirmar'}
+                                        onClick={confirmSignup}
+                                        top={15}
+                                    />
+                                }
+
+                            </>
+
+
                         }
-                    }}
-                    containerStyle={styles.content}
-                    showCancel={true}
-                    onCancel={_onCancel}
-                    onTap={_onTap}
-                    titleNumOfLines={5}
-                    messageNumOfLines={0}
-                    onClose={_onClose}
-                />
-            </AuthContext.Provider>
+
+
+                    </Animatable.View>
+                </View>
+
+
+                :
+
+                <AuthContext.Provider
+                    value={{
+                        isAuthenticated,
+                        user,
+                        isLoading,
+                        setLoading,
+                        signIn,
+                        signUp,
+                        signOut,
+                        _showAlert
+                    }}>
+                    {children}
+                </AuthContext.Provider>
 
     );
 }

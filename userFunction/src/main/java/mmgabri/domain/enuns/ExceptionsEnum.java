@@ -1,11 +1,11 @@
 package mmgabri.domain.enuns;
 
 public enum ExceptionsEnum {
-    USER_NAME_EXISTS("UsernameExistsException", "Email existente, tente outro email"),
-    CODE_MISMATCH("CodeMismatchException", "Codigo invalido. Tente novamente."),
-    EXPIRED_CODE("ExpiredCodeException", "Codigo expirado!"),
-    NOT_AUTHORIZED("NotAuthorizedException", "Email ou Senha invalida. Tente novamente."),
-    ERROR_SYSTEM("ErrorSystem", "Ooops, algo deu errado. Tente novamente.");
+    USER_NAME_EXISTS("UsernameExistsException", "Este email ja existe."),
+    CODE_MISMATCH("CodeMismatchException", "Codigo de confirmacao invalido ou expirado."),
+    EXPIRED_CODE("ExpiredCodeException", "Codigo de confirmacao invalido ou expirado."),
+    NOT_AUTHORIZED("NotAuthorizedException", "Email e senha nao conferem."),
+    ERROR_SYSTEM("ErrorSystem", "Algo deu errado.");
 
     private String exception;
     private String descricao;

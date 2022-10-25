@@ -95,7 +95,7 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
                 console.log('anuncio.imagens.length:', anuncio.imagens.length)
                 console.log('anuncio.imagens[0].uri:', anuncio.imagens[0].uri)
                 console.log('Chamando api com imagem...')
-                apiAnuncio.post('/anuncios/with-image', formdata)
+                apiAnuncio.post('/anuncios', formdata)
                     .then((response) => {
                         console.log('==========> 001')
                         setIsLoading(false);

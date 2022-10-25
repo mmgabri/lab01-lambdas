@@ -36,8 +36,8 @@ const HomeScreen = ({ navigation }) => {
         setRefreshing(false)
       })
       .catch((error) => {
+        console.error("Error:" , error)
         setRefreshing(false)
-        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
       });
   }
 
