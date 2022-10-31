@@ -27,12 +27,13 @@ const MeusAnunciosScreen = ({ navigation }) => {
     const getMeusAnuncios = async () => {
         try {
             console.log("chamndo api anuncios por user: " , user.id)
-            const response = await apiAnuncio.get(`/anuncios/user/${user.id}`)
+            const response = await apiAnuncio.get(`/user/${user.id}`)
+            console.info("Retorno da api listbyuser com sucesso:" , response.data)
             setAnuncio(response.data)
             setRefreshing(false)
         } catch (error) {
             console.error('Erro na chamada da api listbyuser: ', error)
-            _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
+            _showAlert('danger', 'Ooops!', 'Algo deu errado.', 7000);
             setRefreshing(false)
         }
     }

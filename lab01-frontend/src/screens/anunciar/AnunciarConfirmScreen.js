@@ -11,6 +11,7 @@ import stylesCommon from '../../components/stylesCommon'
 import ItemAnuncio from '../ItemAnuncioScreen';
 import Button from '../../components/Button';
 import ButtonTransparent from '../../components/ButtonTransparent';
+import { formatvalorNumeric } from '../../services/utils';
 
 const AnunciarConfirmScreen = ({ route, navigation }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -29,114 +30,77 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
     }, [])
 
     const publicarAnuncio = async () => {
-        setIsLoading(true);
 
         const formdata = new FormData();
-        formdata.append("id", anuncio.id)
-        formdata.append("userId", user.id)
-        formdata.append("tipo", anuncio.tipo)
-        formdata.append("categoria", anuncio.categoria)
-        formdata.append("status", 'ATIVO')
-        formdata.append("titulo", anuncio.titulo)
-        formdata.append("descricao", anuncio.descricao)
-        formdata.append("cep", anuncio.cep)
-        anuncio.imagens.forEach(imagem =>
-            formdata.append('file', imagem)
-        );
 
-        anuncio.userId = user.id;
-
-        if (anuncio.valor == 0) {
-            formdata.append("valor", anuncio.valor)
-        } else {
-            anuncio.valor = anuncio.valor.replace(/[^0-9,]*/g, '').replace(',', '.')
-            formdata.append("valor", anuncio.valor.replace(/[^0-9,]*/g, '').replace(',', '.'))
+        console.log("imagens-lenght:" , anuncio.imagens.length)
+        if (anuncio.imagens.length > 0 && anuncio.imagens[0].uri) {
+            console.log("Há files", anuncio.imagens)
+            anuncio.imagens.forEach(imagem =>
+                formdata.append('file', imagem)
+            );
+            anuncio.imagens = [] 
         }
+       
+
+        let anuncioObj = {
+            id: anuncio.id,
+            userId: user.id,
+            tipo: anuncio.tipo,
+            categoria: anuncio.categoria,
+            status: 'ATIVO',
+            titulo: anuncio.titulo,
+            descricao: anuncio.descricao,
+            cep: anuncio.cep,
+            valor: formatvalorNumeric(anuncio.valor),
+          valor: 0,
+            imagens: anuncio.imagens
+        }
+
+        formdata.append('anuncio', JSON.stringify(anuncioObj))
+        
+        setIsLoading(true);
 
         if (isUpdating) {
-            if (anuncio.imagens.length > 0 && anuncio.imagens[0].uri) {
-                apiAnuncio.put('/anuncios/with-image', formdata)
-                    .then((response) => {
-                        setIsLoading(false);
-                        _showAlert('success', 'Anúncio alterado com sucesso!', '', 3000);
-                        navigation.dispatch(CommonActions.reset({
-                            index: 1, routes: [
-                                { name: 'MeusAnuncios' },
-                                { name: 'MeusAnuncios' },
-                            ],
-                        }));
-                    })
-                    .catch((error) => {
-                        setIsLoading(false);
-                        console.error('Erro na api anuncio/create/with/image:', error)
-                        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-                    });
-            } else {
-                apiAnuncio.put('/anuncios/without-image', anuncio)
-                    .then((response) => {
-                        setIsLoading(false);
-                        _showAlert('success', 'Anúncio alterado com sucesso!', '', 3000);
-                        navigation.dispatch(CommonActions.reset({
-                            index: 1, routes: [
-                                { name: 'MeusAnuncios' },
-                                { name: 'MeusAnuncios' },
-                            ],
-                        }));
-                    })
-                    .catch((error) => {
-                        setIsLoading(false);
-                        console.error('Erro na api anuncio/create/without/image:', error)
-                        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-                    });
-            }
+            console.log('Update Anuncio', formdata)
+            apiAnuncio.put('', formdata)
+                .then((response) => {
+                    console.info("Anuncio atualizado com sucesso", response.data)
+                    setIsLoading(false);
+                    _showAlert('success', "Obaa", 'Anúncio alterado com sucesso!', 3000);
+                    navigation.dispatch(CommonActions.reset({
+                        index: 1, routes: [
+                            { name: 'MeusAnuncios' },
+                            { name: 'MeusAnuncios' },
+                        ],
+                    }));
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    console.error('Erro ao atualizar anuncio:', error)
+                    _showAlert('danger', 'Ooops!', "Algo deu errado.", 7000);
+                });
         } else {
-            if (anuncio.imagens.length > 0 && anuncio.imagens[0].uri) {
-                console.log('Criando no anuncio com imagem:', formdata)
-                console.log('anuncio.imagens.length:', anuncio.imagens.length)
-                console.log('anuncio.imagens[0].uri:', anuncio.imagens[0].uri)
-                console.log('Chamando api com imagem...')
-                apiAnuncio.post('/anuncios', formdata)
-                    .then((response) => {
-                        console.log('==========> 001')
-                        setIsLoading(false);
-                        _showAlert('success', 'Anúncio publicado com sucesso!', '', 3000);
-                        navigation.dispatch(CommonActions.reset({
-                            index: 1, routes: [
-                                { name: 'Anunciar' },
-                                { name: 'MeusAnuncios' },
-                            ],
-                        }));
-                    })
-                    .catch((error) => {
-                        console.log('==========> 002')
-                        setIsLoading(false);
-                        console.error('Erro na api anuncio/create/with/image:', error)
-                        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-                    });
-            } else {
-                console.log('Criando no anuncio sem imagem:', anuncio)
-                apiAnuncio.post('/anuncios/without-image', anuncio)
-                    .then((response) => {
-                        console.log('==========> 003')
-                        setIsLoading(false);
-                        _showAlert('success', 'Anúncio publicado com sucesso!', '', 3000);
-                        navigation.dispatch(CommonActions.reset({
-                            index: 1, routes: [
-                                { name: 'Anunciar' },
-                                { name: 'MeusAnuncios' },
-                            ],
-                        }));
-                    })
-                    .catch((error) => {
-                        console.log('==========> 004')
-                        setIsLoading(false);
-                        console.error('Erro na api anuncio/create/without/image:', error)
-                        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-                    });
-            }
+            console.log('Create Anuncio', formdata)
+            apiAnuncio.post('', formdata)
+                .then((response) => {
+                    console.info("Anuncio publicado com sucesso", response.data)
+                    setIsLoading(false);
+                    _showAlert('success', "Obaa", 'Anúncio publicado com sucesso!', 3000);
+                    navigation.dispatch(CommonActions.reset({
+                        index: 1, routes: [
+                            { name: 'Anunciar' },
+                            { name: 'MeusAnuncios' },
+                        ],
+                    }));
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    console.error('Erro ao criar anuncio:', error)
+                    _showAlert('danger', 'Ooops!', "Algo deu errado.", 7000);
+                });
         }
     }
-
 
     return (
 
@@ -187,6 +151,6 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
                 </ScrollView>
             </View>
     )
-};
+}
 
 export default AnunciarConfirmScreen;

@@ -13,8 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
+import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB_NOTFOUND;
 
 @AllArgsConstructor
 public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
@@ -37,13 +39,22 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
 
         if (anuncios.size() > 0){
             mapper.delete(anuncios.get(0));
+        }else{
+            logger.error(ERROR_DYNAMODB_NOTFOUND.getDescricao());
+            throw new BusinessException(ERROR_DYNAMODB_NOTFOUND.getDescricao());
         }
     }
 
-
     @Override
     public void update(AnuncioEntity anuncio) {
+        List<AnuncioEntity> anuncios = getItem(anuncio.getDados().getUserId(), anuncio.getDados().getId());
 
+        if (anuncios.size() > 0){
+            save(anuncio);
+        }else{
+            logger.error(ERROR_DYNAMODB_NOTFOUND.getDescricao());
+            throw new BusinessException(ERROR_DYNAMODB_NOTFOUND.getDescricao());
+        }
     }
 
     @Override
@@ -54,9 +65,8 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
 
         DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
                 .withConsistentRead(false)
-                .withKeyConditionExpression("pk_user = :value1 and contains(sk_anuncio, :value2)")
+                .withKeyConditionExpression("pk_user = :value1 and sk_anuncio = :value2")
                 .withExpressionAttributeValues(eav);
-
         try {
             return mapper.query(AnuncioEntity.class, queryExpression);
         } catch (Exception e) {
@@ -88,7 +98,7 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
     public List<AnuncioEntity> listByUser(String userId) {
 
         HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        eav.put(":value1", new AttributeValue().withS("USER#" + userId));
+        eav.put(":value1", new AttributeValue().withS(userId));
 
         DynamoDBQueryExpression<AnuncioEntity> queryExpression = new DynamoDBQueryExpression<AnuncioEntity>()
                 .withConsistentRead(false)

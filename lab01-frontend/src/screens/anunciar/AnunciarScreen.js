@@ -9,7 +9,7 @@ const AnunciarScreen = ({ navigation }) => {
   const { user} = useAuth();
 
   var anuncio = {
-    id: '',
+    id: null,
     titulo: '',
     descricao: '',
     tipo: '',
@@ -17,8 +17,7 @@ const AnunciarScreen = ({ navigation }) => {
     valor: 0,
     cep: '',
     userId: user.id,
-    imagens: [],
-    imagensDevice: true
+    imagens: []
 }
 
   return (

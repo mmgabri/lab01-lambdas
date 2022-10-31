@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.gson.Gson;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.AnuncioResponse;
-import com.mmgabri.domain.BodyError;
+import com.mmgabri.domain.BodyReponse;
 import com.mmgabri.exceptions.BusinessException;
 import com.mmgabri.services.AnuncioServiceImpl;
 import com.mmgabri.services.ParseBodyServiceImpl;
@@ -24,22 +24,45 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
 
     @Override
     public APIGatewayProxyResponseEvent execute(APIGatewayProxyRequestEvent event) {
-        logger.info("Processando resource " + event.getResource());
+        logger.info("Processando Method/Resource: " + event.getHttpMethod()  + event.getResource());
 
         switch (event.getHttpMethod()) {
             case "POST":
-                switch (event.getResource()) {
-                    case "/anuncios":
-                        try {
-                            AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
-                            service.create(request);
-                            return builderResponse(200, gson.toJson(builderBodyError("Sucess!")));
-                        } catch (BusinessException e) {
-                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
-                        }
-                    default:
-                        return null;
+                if ((event.getResource().equals("/anuncios"))) {
+                    try {
+                        AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
+                        service.create(request);
+                        return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
+                    } catch (BusinessException e) {
+                        return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
+                    }
                 }
+                return builderResponse(400, gson.toJson(builderBodyResponse("Recurso nao previsto")));
+            case "PUT":
+                if ((event.getResource().equals("/anuncios"))) {
+                    try {
+                        AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
+                        service.update(request);
+                        return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
+                    } catch (BusinessException e) {
+                        return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
+                    }
+                }
+                return builderResponse(400, gson.toJson(builderBodyResponse("Recurso nao previsto")));
+            case "DELETE":
+                if ((event.getResource().equals("/anuncios"))) {
+                    try {
+                        AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
+                       // AnuncioRequest request = new AnuncioRequest();
+                       // request.setAnuncio(gson.fromJson(event.getBody(), Anuncio.class));
+                      //  logger.info("Request:" + gson.toJson(request));
+                        service.delete(request);
+                        return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
+                    } catch (BusinessException e) {
+                        return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
+                    }
+                }
+                return builderResponse(400, gson.toJson(builderBodyResponse("Recurso nao previsto")));
             case "GET":
                 switch (event.getResource()) {
                     case "/anuncios":
@@ -47,34 +70,35 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                             List<AnuncioResponse> resp = service.listAll();
                             return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
-                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                            return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/user/{userId}":
                         try {
+                            logger.info("userId:" + event.getPathParameters().get("userId"));
                             List<AnuncioResponse> resp = service.listByUser(event.getPathParameters().get("userId"));
                             return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
-                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                            return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/tipo/{tipo}":
                         try {
                             List<AnuncioResponse> resp = service.listByTipo(event.getPathParameters().get("tipo"));
                             return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
-                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                            return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/categoria/{categoria}":
                         try {
                             List<AnuncioResponse> resp = service.listByCategoria(event.getPathParameters().get("categoria"));
                             return builderResponse(200, gson.toJson(resp));
                         } catch (BusinessException e) {
-                            return builderResponse(400, gson.toJson(builderBodyError(e.getMessage())));
+                            return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     default:
-                        return null;
+                        return builderResponse(400, gson.toJson(builderBodyResponse("Recurso nao previsto")));
                 }
             default:
-                return null;
+                return builderResponse(400, gson.toJson(builderBodyResponse("Recurso nao previsto")));
         }
     }
 
@@ -85,8 +109,8 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
         return response;
     }
 
-    private BodyError builderBodyError(String message) {
-        return BodyError.builder()
+    private BodyReponse builderBodyResponse(String message) {
+        return BodyReponse.builder()
                 .message(message)
                 .build();
     }

@@ -61,6 +61,8 @@ public class ParseBodyServiceImpl {
 
                 Map<String, String> allHeaders = splitHeaders(header);
 
+                logger.info("allHeaders:" + allHeaders);
+
                 String inputFieldName = extractFields(allHeaders, "name");
 
                 String inputFilename = inputFieldName.equals("file") ? extractFields(allHeaders, "filename") : "";
@@ -86,6 +88,7 @@ public class ParseBodyServiceImpl {
                 request.setFiles(files);
             }
             logger.info("Body parseado com sucesso. Quantidade de Input Field: " + countInputField);
+            logger.info("Request:" + gson.toJson(request.getAnuncio()));
 
         } catch (IOException e) {
             logger.error("Erro no parse do Body: " + e.getMessage());
@@ -121,7 +124,13 @@ public class ParseBodyServiceImpl {
 
     private String extractFields(Map<String, String> allHeaders, String field) {
 
-        String contentTypeHeader = allHeaders.get("Content-Disposition");
+        String contentTypeHeader;
+
+        contentTypeHeader = allHeaders.get("Content-Disposition");
+
+        if (contentTypeHeader == null){
+            contentTypeHeader = allHeaders.get("content-disposition");
+        }
 
         ImmutableMap.Builder<String, String> fieldsBuilder = new ImmutableMap.Builder<String, String>();
         String[] contentTypeHeaderParts = contentTypeHeader.split("[;,]");

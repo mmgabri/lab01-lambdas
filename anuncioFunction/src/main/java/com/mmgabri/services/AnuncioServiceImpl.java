@@ -2,6 +2,7 @@ package com.mmgabri.services;
 
 import com.mmgabri.adapter.database.RepositoryDynamoDB;
 import com.mmgabri.adapter.files.S3FileServiceImpl;
+import com.mmgabri.domain.Anuncio;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.AnuncioResponse;
 import com.mmgabri.domain.entity.AnuncioEntity;
@@ -24,7 +25,12 @@ public class AnuncioServiceImpl implements AnuncioService<AnuncioRequest, Anunci
 
     @Override
     public void update(AnuncioRequest request) {
+        repo.update(map.mapRequestToEntity(request));
+    }
 
+    @Override
+    public void delete(AnuncioRequest request) {
+        repo.delete(map.mapRequestToEntity(request));
     }
 
     @Override

@@ -224,6 +224,18 @@ Resources:
               Authorizer: NONE
             Path: '/anuncios/categoria/{categoria}'
             RestApiId: !Ref ApiGateway
+        Delete:
+          Type: Api
+          Properties:
+            Method: PUT
+            Path: '/anuncios'
+            RestApiId: !Ref ApiGateway
+        Update:
+          Type: Api
+          Properties:
+            Method: DELETE
+            Path: '/anuncios'
+            RestApiId: !Ref ApiGateway
 
   #Table DynamoDB Anuncio
   TableAnuncio: 

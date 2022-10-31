@@ -24,9 +24,11 @@ public class S3FileServiceImpl implements FileService {
     public List<String> uploadFile(List<File> files) {
         List<String> listUri = new ArrayList<>();
 
-        for (File f : files) {
-            URI uri = upload(f);
-            listUri.add(uri.toString());
+        if (files != null) {
+            for (File f : files) {
+                URI uri = upload(f);
+                listUri.add(uri.toString());
+            }
         }
         return listUri;
     }

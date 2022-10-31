@@ -45,11 +45,14 @@ const AnuncioScreen = ({ route, navigation }) => {
     }
 
     function excluirAnuncioConfirm(anuncio) {
-        console.log('deleteItem')
+        console.log('Delete Item:' , anuncio)
+
+        const formdata = new FormData();
+        formdata.append('anuncio', JSON.stringify(anuncio))
 
         setLoading(true);
 
-        apiAnuncio.delete(`/anuncios/${anuncio.id}`)
+        apiAnuncio.delete('', formdata)
             .then((response) => {
                 console.log('Retorno api delete:', response)
                 _showAlert('success', 'Anúncio excluido com sucesso', '', 3000);
@@ -61,7 +64,8 @@ const AnuncioScreen = ({ route, navigation }) => {
                 }));
             })
             .catch((error) => {
-                _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
+                console.error("Erro na api delete: " , error)
+                _showAlert('danger', 'Ooops!', "Algo deu errado.", 7000);
                 setLoading(false);
             });
     }

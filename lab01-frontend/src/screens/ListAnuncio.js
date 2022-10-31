@@ -4,7 +4,7 @@ import { enunsTipoCategoria } from '../services/enuns';
 import { formatValor } from '../services/utils';
 import Feather from 'react-native-vector-icons/Feather';
 
-const ListAnuncio = ({ anuncios, routeMeusAnuncios, onClick, onRefresh, refreshing}) => {
+const ListAnuncio = ({ anuncios, routeMeusAnuncios, onClick, onRefresh, refreshing }) => {
 
     function Item({ item }) {
         return (
@@ -43,20 +43,14 @@ const ListAnuncio = ({ anuncios, routeMeusAnuncios, onClick, onRefresh, refreshi
     }
 
     return (
-        <ScrollView
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                />
-            }>
-            <FlatList
-                style={{ flex: 1 }}
-                data={anuncios}
-                renderItem={({ item }) => <Item item={item} />}
-                keyExtractor={item => item.id.toString()}
-            />
-        </ScrollView>
+        <FlatList
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            style={{ flex: 1 }}
+            data={anuncios}
+            renderItem={({ item }) => <Item item={item} />}
+            keyExtractor={item => item.id.toString()}
+        />
     )
 };
 

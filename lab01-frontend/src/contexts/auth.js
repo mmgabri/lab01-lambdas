@@ -40,15 +40,18 @@ const AuthProvider = ({ children, navigation }) => {
 
     useEffect(() => {
         console.log('---- useEffect - auth ----')
-    //    LogBox.ignoreAllLogs()
         apiUser.defaults.timeout = 25000;
         apiAnuncio.defaults.timeout = 25000;
         apiChat.defaults.timeout = 25000;
         const loadStorageData = async () => {
             const storageUser = await getUserStorage();
-       //     console.info('Usuário obtido do storage -->', storageUser)
+          //  console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
                 setUser(storageUser)
+                console.info('idToken -->', storageUser.idToken)
+                apiUser.defaults.headers.authorization = storageUser.idToken;
+                apiAnuncio.defaults.headers.Authorization = storageUser.idToken;
+                apiChat.defaults.headers.authorization = storageUser.idToken;
                 setIsAuthenticated(true)
             }
         };
