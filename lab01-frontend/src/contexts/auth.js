@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useRef, } from 'react';
 import { StyleSheet, View, Text, StatusBar, LogBox } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import Button from '../components/Button';
 import ButtonDisable from '../components/ButtonDisable';
@@ -12,18 +13,11 @@ import { setUserStorage, getUserStorage, removeUserStorage } from '../services/l
 import stylesCommon from '../components/stylesCommon'
 import { showMessage, hideMessage } from "react-native-flash-message";
 
-//LogBox.ignoreAllLogs();
-
 console.disableYellowBox = true;
 console.hideMessage = true;
 
 const AuthContext = createContext({
-//    isAuthenticated: false,
-//    loading: false,
-//    token: "",
-    //user: {}
 });
-
 
 const AuthProvider = ({ children, navigation }) => {
     const [user, setUser] = useState({});
@@ -45,7 +39,7 @@ const AuthProvider = ({ children, navigation }) => {
         apiChat.defaults.timeout = 25000;
         const loadStorageData = async () => {
             const storageUser = await getUserStorage();
-          //  console.info('Usuário obtido do storage -->', storageUser)
+            //  console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
                 setUser(storageUser)
                 console.info('idToken -->', storageUser.idToken)
@@ -65,7 +59,6 @@ const AuthProvider = ({ children, navigation }) => {
     const changeConfirmationCode = (val) => {
         console.log('----------changeConfirmationCode------', val)
         setConfirmationCode(val);
-        console.log('confirmationCode:', confirmationCode)
         setconfirmationCodeInvalid(false)
         if (val.length == 6) {
             setEnableButton(true)
@@ -88,7 +81,6 @@ const AuthProvider = ({ children, navigation }) => {
             setConfirmSignup(true)
             setConfirmationCode('')
             setEnableButton(false)
-         //   _showAlert('success', 'Bem vindo !', '', 3000);
         } catch (error) {
             console.error('Erro na api signup:', error)
             setIsLoading(false)
@@ -128,6 +120,7 @@ const AuthProvider = ({ children, navigation }) => {
 
     function signIn(email, password) {
         console.log('---- Entrou no signIn ----')
+        notAuthenticated();
         setIsLoading(true)
 
         apiUser.post('/signin', { email: email, password: password })
@@ -166,6 +159,11 @@ const AuthProvider = ({ children, navigation }) => {
 
     async function signOut() {
         console.log('---- Entrou no signOut ----', user)
+        notAuthenticated();
+    }
+
+    async function notAuthenticated() {
+        console.log('---- Entrou no not authenticated ----')
         await removeUserStorage()
         setUser({})
         setIsAuthenticated(false)
@@ -173,14 +171,14 @@ const AuthProvider = ({ children, navigation }) => {
 
 
     function _showAlert(type, title, message, interval) {
-        console.log('_showAlert')
+        console.log('_showAlert:', message)
 
         showMessage({
             message: title,
             description: message,
             type: type,
-           duration: interval
-          });
+            duration: interval
+        });
 
     };
 
@@ -215,7 +213,7 @@ const AuthProvider = ({ children, navigation }) => {
                         />
                         {confirmationCodeInvalid ?
                             <>
-                               <Animatable.View animation="fadeInLeft" duration={500}>
+                                <Animatable.View animation="fadeInLeft" duration={500}>
                                     <Text style={stylesCommon.infoMsg}></Text>
                                 </Animatable.View>
                                 {enableButton ?
@@ -262,10 +260,8 @@ const AuthProvider = ({ children, navigation }) => {
 
                         }
 
-
                     </Animatable.View>
                 </View>
-
 
                 :
 
@@ -274,6 +270,7 @@ const AuthProvider = ({ children, navigation }) => {
                         isAuthenticated,
                         user,
                         isLoading,
+                        notAuthenticated,
                         setLoading,
                         signIn,
                         signUp,

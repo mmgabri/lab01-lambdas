@@ -3,10 +3,10 @@ package com.mmgabri.application;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import com.mmgabri.domain.Anuncio;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.AnuncioResponse;
 import com.mmgabri.domain.BodyReponse;
-import com.mmgabri.exceptions.BusinessException;
 import com.mmgabri.services.AnuncioServiceImpl;
 import com.mmgabri.services.ParseBodyServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,8 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                         AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
                         service.create(request);
                         return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
-                    } catch (BusinessException e) {
+                    } catch (Exception e) {
+                        logger.info("Erro no processamento - Exception:" + e );
                         return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                     }
                 }
@@ -44,7 +45,8 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                         AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
                         service.update(request);
                         return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
-                    } catch (BusinessException e) {
+                    } catch (Exception e) {
+                        logger.info("Erro no processamento - Exception:" + e );
                         return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                     }
                 }
@@ -52,13 +54,13 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
             case "DELETE":
                 if ((event.getResource().equals("/anuncios"))) {
                     try {
-                        AnuncioRequest request = parseService.parse(event.getBody(), event.getHeaders());
-                       // AnuncioRequest request = new AnuncioRequest();
-                       // request.setAnuncio(gson.fromJson(event.getBody(), Anuncio.class));
-                      //  logger.info("Request:" + gson.toJson(request));
+                        AnuncioRequest request = new AnuncioRequest();
+                        request.setAnuncio(gson.fromJson(event.getBody(), Anuncio.class));
+                        logger.info("Request:" + gson.toJson(request));
                         service.delete(request);
                         return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
-                    } catch (BusinessException e) {
+                    } catch (Exception e) {
+                        logger.info("Erro no processamento - Exception:" + e );
                         return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                     }
                 }
@@ -69,7 +71,8 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                         try {
                             List<AnuncioResponse> resp = service.listAll();
                             return builderResponse(200, gson.toJson(resp));
-                        } catch (BusinessException e) {
+                        } catch (Exception e) {
+                            logger.info("Erro no processamento - Exception:" + e );
                             return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/user/{userId}":
@@ -77,21 +80,24 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                             logger.info("userId:" + event.getPathParameters().get("userId"));
                             List<AnuncioResponse> resp = service.listByUser(event.getPathParameters().get("userId"));
                             return builderResponse(200, gson.toJson(resp));
-                        } catch (BusinessException e) {
+                        } catch (Exception e) {
+                            logger.info("Erro no processamento - Exception:" + e );
                             return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/tipo/{tipo}":
                         try {
                             List<AnuncioResponse> resp = service.listByTipo(event.getPathParameters().get("tipo"));
                             return builderResponse(200, gson.toJson(resp));
-                        } catch (BusinessException e) {
+                        } catch (Exception e) {
+                            logger.info("Erro no processamento - Exception:" + e );
                             return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     case "/anuncios/categoria/{categoria}":
                         try {
                             List<AnuncioResponse> resp = service.listByCategoria(event.getPathParameters().get("categoria"));
                             return builderResponse(200, gson.toJson(resp));
-                        } catch (BusinessException e) {
+                        } catch (Exception e) {
+                            logger.info("Erro no processamento - Exception:" + e );
                             return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                         }
                     default:

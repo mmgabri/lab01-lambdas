@@ -41,7 +41,11 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
 
         APIGatewayProxyResponseEvent response = useCase.execute(event);
 
-        logger.info("Processamento finalizado com sucesso!");
+        if (response.getStatusCode().equals(200)){
+            logger.info("Processamento finalizado com sucesso!");
+        }else{
+            logger.info("Processamento finalizado com erro - statusCode = " + response.getStatusCode());
+        }
 
         return response;
     }

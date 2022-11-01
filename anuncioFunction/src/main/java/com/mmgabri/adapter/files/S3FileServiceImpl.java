@@ -41,7 +41,8 @@ public class S3FileServiceImpl implements FileService {
             s3Client.deleteObject(bucketName, fileName);
             logger.info("deleção da imagem finalizada");
         } catch (Exception e) {
-            throw new FileException("Erro de IO: " + e.getMessage());
+            logger.error("Erro delete object S3: " + e);
+            throw new FileException("Erro delete object S3" + e.getMessage());
         }
     }
 
@@ -50,9 +51,11 @@ public class S3FileServiceImpl implements FileService {
             s3Client.putObject(bucketName, file.getFileName(), file.getFile(), file.getMetadata());
             return s3Client.getUrl(bucketName, file.getFileName()).toURI();
         } catch (URISyntaxException e) {
+            logger.error("Erro ao converter URL para URI: " + e);
             throw new FileException("Erro ao converter URL para URI");
         } catch (Exception e) {
-            throw new FileException("Erro Upload S3" + e.getMessage());
+            logger.error("Error upload file to bucket S3" + e);
+            throw new FileException("Error upload file to bucket S3" + e.getMessage());
         }
     }
 }

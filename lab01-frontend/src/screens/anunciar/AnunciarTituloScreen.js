@@ -13,7 +13,6 @@ const AnunciarTituloScreen = ({ route, navigation }) => {
     const [isMessageWarning, setIsMessageWarning] = useState(false);
     const [enableButton, setEnableButton] = useState(false);
     const { anuncio } = route.params;
-
     const { colors } = useTheme();
 
     const handleInputChange = (val) => {

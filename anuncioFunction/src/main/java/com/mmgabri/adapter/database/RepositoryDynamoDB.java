@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB_NOTFOUND;
@@ -37,7 +36,7 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
     public void delete(AnuncioEntity anuncio) {
         List<AnuncioEntity> anuncios = getItem(anuncio.getDados().getUserId(), anuncio.getDados().getId());
 
-        if (anuncios.size() > 0){
+        if (anuncios.size() == 1){
             mapper.delete(anuncios.get(0));
         }else{
             logger.error(ERROR_DYNAMODB_NOTFOUND.getDescricao());
@@ -49,7 +48,7 @@ public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
     public void update(AnuncioEntity anuncio) {
         List<AnuncioEntity> anuncios = getItem(anuncio.getDados().getUserId(), anuncio.getDados().getId());
 
-        if (anuncios.size() > 0){
+        if (anuncios.size() == 1){
             save(anuncio);
         }else{
             logger.error(ERROR_DYNAMODB_NOTFOUND.getDescricao());

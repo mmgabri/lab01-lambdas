@@ -2,7 +2,6 @@ package com.mmgabri.services;
 
 import com.mmgabri.adapter.database.RepositoryDynamoDB;
 import com.mmgabri.adapter.files.S3FileServiceImpl;
-import com.mmgabri.domain.Anuncio;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.AnuncioResponse;
 import com.mmgabri.domain.entity.AnuncioEntity;
@@ -18,13 +17,19 @@ public class AnuncioServiceImpl implements AnuncioService<AnuncioRequest, Anunci
 
     @Override
     public void create(AnuncioRequest request) {
-        List<String> listUri = fileService.uploadFile(request.getFiles());
-        request.getAnuncio().setImagens(listUri);
+        if (request.getFiles() != null) {
+            List<String> listUri = fileService.uploadFile(request.getFiles());
+            request.getAnuncio().setImagens(listUri);
+        }
         repo.save(map.mapRequestToEntity(request));
     }
 
     @Override
     public void update(AnuncioRequest request) {
+        if (request.getFiles() != null) {
+            List<String> listUri = fileService.uploadFile(request.getFiles());
+            request.getAnuncio().setImagens(listUri);
+        }
         repo.update(map.mapRequestToEntity(request));
     }
 

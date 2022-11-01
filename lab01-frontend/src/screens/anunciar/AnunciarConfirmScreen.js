@@ -4,7 +4,7 @@ import * as Animatable from 'react-native-animatable';
 import { useTheme } from 'react-native-paper';
 import { CommonActions } from '@react-navigation/native';
 import AwesomeLoading from 'react-native-awesome-loading';
-
+import { decodeMessage } from '../../services/decodeMessage'
 import { useAuth } from '../../contexts/auth';
 import { apiAnuncio } from '../../services/api';
 import stylesCommon from '../../components/stylesCommon'
@@ -21,7 +21,7 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
     const { colors } = useTheme();
 
     useEffect(() => {
-        console.log('---- useEffect - confirm ----')
+        console.log('---- useEffect - confirm ----', anuncio)
 
         if (anuncio.id) {
             setIsUPudating(true)
@@ -29,19 +29,19 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
 
     }, [])
 
-    const publicarAnuncio = async () => {
+    function onError(error) {
+        console.log("onError")
+        const statusCode = error.response?.status;
 
-        const formdata = new FormData();
-
-        console.log("imagens-lenght:" , anuncio.imagens.length)
-        if (anuncio.imagens.length > 0 && anuncio.imagens[0].uri) {
-            console.log("Há files", anuncio.imagens)
-            anuncio.imagens.forEach(imagem =>
-                formdata.append('file', imagem)
-            );
-            anuncio.imagens = [] 
+        if (statusCode == 401) {
+            _showAlert('info', 'Ooops!', decodeMessage(statusCode), 4000);
+            navigation.navigate('SignInTab')
         }
-       
+        _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 7000);
+    }
+
+
+    const publicarAnuncio = async () => {
 
         let anuncioObj = {
             id: anuncio.id,
@@ -53,12 +53,16 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
             descricao: anuncio.descricao,
             cep: anuncio.cep,
             valor: formatvalorNumeric(anuncio.valor),
-          valor: 0,
             imagens: anuncio.imagens
         }
 
+        const formdata = new FormData();
+
         formdata.append('anuncio', JSON.stringify(anuncioObj))
-        
+
+        anuncio.imagensAdvice.forEach(file =>
+            formdata.append('file', file))
+
         setIsLoading(true);
 
         if (isUpdating) {
@@ -68,17 +72,12 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
                     console.info("Anuncio atualizado com sucesso", response.data)
                     setIsLoading(false);
                     _showAlert('success', "Obaa", 'Anúncio alterado com sucesso!', 3000);
-                    navigation.dispatch(CommonActions.reset({
-                        index: 1, routes: [
-                            { name: 'MeusAnuncios' },
-                            { name: 'MeusAnuncios' },
-                        ],
-                    }));
+                    navigation.navigate('MeusAnuncios')
                 })
                 .catch((error) => {
                     setIsLoading(false);
                     console.error('Erro ao atualizar anuncio:', error)
-                    _showAlert('danger', 'Ooops!', "Algo deu errado.", 7000);
+                    onError(error)
                 });
         } else {
             console.log('Create Anuncio', formdata)
@@ -87,17 +86,12 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
                     console.info("Anuncio publicado com sucesso", response.data)
                     setIsLoading(false);
                     _showAlert('success', "Obaa", 'Anúncio publicado com sucesso!', 3000);
-                    navigation.dispatch(CommonActions.reset({
-                        index: 1, routes: [
-                            { name: 'Anunciar' },
-                            { name: 'MeusAnuncios' },
-                        ],
-                    }));
+                    navigation.navigate('MeusAnuncios')
                 })
                 .catch((error) => {
                     setIsLoading(false);
                     console.error('Erro ao criar anuncio:', error)
-                    _showAlert('danger', 'Ooops!', "Algo deu errado.", 7000);
+                    onError(error)
                 });
         }
     }
@@ -124,7 +118,11 @@ const AnunciarConfirmScreen = ({ route, navigation }) => {
                             color: colors.text
                         }]}>Confirme os dados do seu anúncio</Text>
 
-                        <ItemAnuncio anuncio={anuncio} />
+                        {anuncio.imagensAdvice.length > 0 ?
+                            <ItemAnuncio anuncio={anuncio} images={anuncio.imagensAdvice} />
+                            :
+                            <ItemAnuncio anuncio={anuncio} images={anuncio.imagens} />
+                        }
 
                         {
                             isUpdating ?

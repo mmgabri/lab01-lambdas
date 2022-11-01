@@ -1,9 +1,9 @@
 package com.mmgabri.domain;
 
-import lombok.*;
-import com.mmgabri.domain.enuns.CategoriaEnum;
-import com.mmgabri.domain.enuns.StatusAnuncioEnum;
-import com.mmgabri.domain.enuns.TipoAnuncioEnum;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 

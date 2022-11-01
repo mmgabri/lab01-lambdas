@@ -13,17 +13,25 @@ const width = Dimensions.get('window').width * 0.9;
 
 const AnunciarImagensScreen = ({ route, navigation }) => {
     const [imagens, setImagens] = useState([]);
+    const [isImageAdvice, setImageAdvice] = useState(false);
     const { colors } = useTheme();
-    const { anuncio } = route.params;
+    let { anuncio } = route.params;
 
     useEffect(() => {
+        console.log("AnunciarImagensScreen" , anuncio)
         if (anuncio.id) {
             setImagens(anuncio.imagens)
         }
     }, [])
 
     const continuar = () => {
-        anuncio.imagens = imagens;
+        if (isImageAdvice){
+            anuncio.imagensAdvice = imagens;
+            anuncio.imagens = [];
+        }else{
+            anuncio.imagensAdvice = [];
+        }
+
         navigation.navigate('AnunciarConfirm', { anuncio: anuncio, });
     }
 
@@ -68,6 +76,7 @@ const AnunciarImagensScreen = ({ route, navigation }) => {
 
     const cleanPicker = () => {
         setImagens([]);
+        setImageAdvice(true)
         ImagePicker.clean()
             .then(() => {
             }).catch(error => {

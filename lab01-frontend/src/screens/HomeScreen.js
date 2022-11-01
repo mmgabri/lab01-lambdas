@@ -14,6 +14,7 @@ const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
 
   useEffect(() => {
+    console.log("Entrou em HomeScreen")
     getAnuncios();
   }, [])
 

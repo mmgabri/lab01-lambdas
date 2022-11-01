@@ -1,24 +1,45 @@
-import React from 'react';
-import {View,Text,StyleSheet,  StatusBar,} from 'react-native';import * as Animatable from 'react-native-animatable';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, StatusBar, } from 'react-native'; import * as Animatable from 'react-native-animatable';
 import { useTheme } from 'react-native-paper';
 import { useAuth } from '../../contexts/auth';
 import Button from '../../components/Button';
+import { decodeMessage } from '../../services/decodeMessage'
 
 const AnunciarScreen = ({ navigation }) => {
+  const [anuncio, setAnuncio] = useState('');
+  const [load, setLoad] = useState(true)
   const { colors } = useTheme();
-  const { user} = useAuth();
+  const { user, isAuthenticated, _showAlert } = useAuth();
 
-  var anuncio = {
-    id: null,
-    titulo: '',
-    descricao: '',
-    tipo: '',
-    categoria: '',
-    valor: 0,
-    cep: '',
-    userId: user.id,
-    imagens: []
-}
+  useEffect(() => {
+
+    navigation.addListener('focus', () => setLoad(!load))
+
+    console.log("user:", isAuthenticated)
+
+    if (!isAuthenticated) {
+      _showAlert('info', 'Ooops!', decodeMessage(401), 4000);
+      navigation.navigate('SignInTab')
+    }
+
+    
+    var anuncioObject = {
+      id: null,
+      titulo: '',
+      descricao: '',
+      tipo: '',
+      categoria: '',
+      valor: 0,
+      cep: '',
+      userId: user.id,
+      imagens: [],
+      imagensAdvice: []
+    }
+
+
+    setAnuncio(anuncioObject)
+
+  }, [load, navigation])
 
   return (
 
@@ -43,10 +64,10 @@ const AnunciarScreen = ({ navigation }) => {
         </View>
 
         <Button
-            text={'Iniciar'}
-            onClick={() => navigation.navigate('AnunciarTitulo', { anuncio: anuncio, })}
-            top={30}
-          />
+          text={'Iniciar'}
+          onClick={() => navigation.navigate('AnunciarTitulo', { anuncio: anuncio, })}
+          top={30}
+        />
       </Animatable.View>
     </View>
   );

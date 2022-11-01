@@ -1,16 +1,11 @@
 package com.mmgabri.domain.entity;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
-import com.mmgabri.domain.enuns.CategoriaEnum;
-import com.mmgabri.domain.enuns.StatusAnuncioEnum;
-import com.mmgabri.domain.enuns.TipoAnuncioEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

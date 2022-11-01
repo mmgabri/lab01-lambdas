@@ -8,14 +8,14 @@ import stylesCommon from '../components/stylesCommon'
 
 const width = Dimensions.get('window').width * 0.9;
 
-const ItemAnuncioScreen = ({ anuncio }) => {
+const ItemAnuncioScreen = ({ anuncio, images }) => {
     const { colors } = useTheme();
 
     return (
         <>
             <View style={styles.imageViewContainer}>
                 <SliderBox resizeMethod={'resize'}
-                    images={anuncio.imagens}
+                    images={images}
                     parentWidth={width}
                     ImageComponentStyle={{ height: 300, width: width }} />
             </View>
