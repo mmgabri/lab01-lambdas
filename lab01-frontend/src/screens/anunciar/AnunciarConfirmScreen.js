@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StatusBar, ScrollView } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { useTheme } from 'react-native-paper';
-import { CommonActions } from '@react-navigation/native';
 import AwesomeLoading from 'react-native-awesome-loading';
 import { decodeMessage } from '../../services/decodeMessage'
 import { useAuth } from '../../contexts/auth';

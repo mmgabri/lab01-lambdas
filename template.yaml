@@ -123,7 +123,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref ParameterLambdaUserName
-      CodeUri: userFunction
+      CodeUri: functionUser
       Handler: mmgabri.lambda.Handler::handleRequest
       Runtime: java11
       Architectures:
@@ -172,7 +172,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref ParameterLambdaAnuncioName
-      CodeUri: anuncioFunction
+      CodeUri: functionAnuncio
       Handler: com.mmgabri.lambda.Handler::handleRequest
       Runtime: java11
       Architectures:
@@ -237,6 +237,50 @@ Resources:
             Path: '/anuncios'
             RestApiId: !Ref ApiGateway
 
+    #------------ Lambda Function - Chat ------------#
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref ParameterLambdaChatName
+      CodeUri: functionChat
+      Handler: com.mmgabri.lambda.Handler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ParameterTableNameChat
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ParameterTableNameChat
+      Events:
+        SendMessage:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: '/chats'
+            RestApiId: !Ref ApiGateway
+        GetChatByUser:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: '/chats/user/{userId}'
+            RestApiId: !Ref ApiGateway
+        GetMessages:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: '/chats/messages'
+            RequestParameters:
+              - method.request.querystring.chatId:
+                  Required: true
+              - method.request.querystring.userIdLogged:
+                  Required: true    
+              - method.request.querystring.userIdConversation:
+                  Required: true    
+            RestApiId: !Ref ApiGateway
+
   #Table DynamoDB Anuncio
   TableAnuncio: 
     Type: AWS::DynamoDB::Table
@@ -278,6 +322,40 @@ Resources:
             - AttributeName: "categoria_pk_index"
               KeyType: "HASH"
             - AttributeName: "sk_anuncio"
+              KeyType: "RANGE"
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+
+  #Table DynamoDB Chat
+  TableChat: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "pk"
+          AttributeType: "S"
+        - AttributeName: "sk"
+          AttributeType: "S"
+        - AttributeName: "date_time_created"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "pk"
+          KeyType: "HASH"
+        - AttributeName: "sk"
+          KeyType: "RANGE"    
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: !Ref ParameterTableNameChat
+
+      GlobalSecondaryIndexes: 
+        - IndexName: "GSI_01"
+          KeySchema: 
+            - AttributeName: "pk"
+              KeyType: "HASH"
+            - AttributeName: "date_time_created"
               KeyType: "RANGE"
           Projection: 
             ProjectionType: ALL

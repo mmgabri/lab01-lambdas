@@ -1,43 +1,58 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import AwesomeLoading from 'react-native-awesome-loading';
 import { useTheme } from 'react-native-paper';
-
+import { decodeMessage } from '../../services/decodeMessage'
 import stylesCommon from '../../components/stylesCommon';
 import { apiChat } from '../../services/api'
 import { useAuth } from '../../contexts/auth'
 import ListChats from './ListChats';
 
 const ChatScreen = ({ navigation }) => {
-  const { user, _showAlert } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { user, _showAlert } = useAuth();
   const { colors } = useTheme();
 
 
   useEffect(() => {
     console.log('---- Chat ----', user.id)
-    getChats() 
+    getChats()
   }, [])
 
+  function onError(error) {
+    console.log("onError")
+    const statusCode = error.response?.status;
+
+    if (statusCode == 401) {
+      _showAlert('info', 'Ooops!', decodeMessage(statusCode), 4000);
+      navigation.navigate('SignInTab')
+    }
+    _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 7000);
+  }
 
   const onRefresh = useCallback(() => {
-    console.log('entrou onRefresh **********')
     setRefreshing(true);
     getChats();
   }, []);
 
   async function getChats() {
-    apiChat.get(`/chats/user/${user.id}`)
-    .then((response) => {
-      console.log('Retorno api getChats:', response.data)
-      setChats(response.data)
-      setRefreshing(false)
-    })
-    .catch((error) => {
-      _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
-      setRefreshing(false)
-    });
+    setIsLoading(true)
+    apiChat.get(`/user/${user.id}`)
+      .then((response) => {
+        console.log('Retorno api getChats:', response.data)
+        setChats(response.data)
+        setRefreshing(false)
+        setIsLoading(false)
+      })
+      .catch((error) => {
+        setIsLoading(false)
+        setRefreshing(false)
+        console.error("Erro na chamada da api getChats by user - Erro:", error)
+        onError(error)
+      });
   }
 
   function onClick(item) {
@@ -47,24 +62,31 @@ const ChatScreen = ({ navigation }) => {
 
   return (
 
-    <View style={styles.container}>
-      <StatusBar backgroundColor='#009387' barStyle="light-content" />
-      <Animatable.View
-        animation="fadeInUpBig"
-        style={[stylesCommon.footer, {
-          backgroundColor: colors.background
-        }]}
-      >
-        <ListChats
-          chats={chats}
-          onClick={onClick}
-          onRefresh={onRefresh}
-          refreshing={refreshing}>
-        </ListChats>
+    isLoading ?
+      < View >
+        <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
+      </View >
 
-      </Animatable.View>
+      :
 
-    </View>
+      <View style={styles.container}>
+        <StatusBar backgroundColor='#009387' barStyle="light-content" />
+        <Animatable.View
+          animation="fadeInUpBig"
+          style={[stylesCommon.footer, {
+            backgroundColor: colors.background
+          }]}
+        >
+          <ListChats
+            chats={chats}
+            onClick={onClick}
+            onRefresh={onRefresh}
+            refreshing={refreshing}>
+          </ListChats>
+
+        </Animatable.View>
+
+      </View>
 
   );
 };

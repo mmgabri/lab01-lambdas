@@ -17,8 +17,8 @@ const apiAnuncio = axios.create({
 });
 
 const apiChat = axios.create({
-  baseURL: 'http://10.0.2.2:9000/chats',
-  //baseURL: 'https://y4tny8add8.execute-api.us-east-1.amazonaws.com/Prod/chats',
+  //baseURL: 'http://10.0.2.2:9000/chats',
+  baseURL: 'https://y4tny8add8.execute-api.us-east-1.amazonaws.com/Prod/chats',
   headers: {
     'x-api-key': 'U8eT4hjyLA9GmWdyhKTO0a5Z2c9OzNWaa1flYJMj'
   }

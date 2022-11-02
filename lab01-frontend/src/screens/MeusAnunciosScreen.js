@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import stylesCommon from '../components/stylesCommon'
-import { CommonActions } from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
 import { useAuth } from '../contexts/auth';
 import { apiAnuncio } from '../services/api';

@@ -1,16 +1,20 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { View} from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
-import { renderCustomSend} from './MessageContainer';
+import AwesomeLoading from 'react-native-awesome-loading';
+import { renderCustomSend } from './MessageContainer';
 import { convertDateTimezoneAmericaSaoPaulo } from '../../services/utils'
+import { decodeMessage } from '../../services/decodeMessage'
 import { apiChat } from '../../services/api'
 import { useAuth } from '../../contexts/auth'
 
 const ChatScreen = ({ route, navigation }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
   const { user, _showAlert } = useAuth();
   const { anuncio } = route.params;
   const { chat } = route.params;
   const { routeChats } = route.params;
-  const [messages, setMessages] = useState([]);
   var userIdTo;
   var chatId;
 
@@ -31,13 +35,17 @@ const ChatScreen = ({ route, navigation }) => {
 
     console.log("params", params)
 
-    apiChat.get(`/chats/messages${params}`)
+    setIsLoading(true)
+    apiChat.get(`/messages${params}`)
       .then((response) => {
+        setIsLoading(false)
         console.log('Retorno api chats/messages:', response.data)
         setMessages(response.data)
       })
       .catch((error) => {
-        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
+        setIsLoading(false)
+        console.error("Erro na chamda da api chats/messages - Erro: ", error)
+        onError(error)
       });
   }, []);
 
@@ -53,13 +61,29 @@ const ChatScreen = ({ route, navigation }) => {
       userIdTo: userIdTo
     }
 
-    apiChat.post('chats/send-message', payload)
-      .then(() => {
+    setIsLoading(true)
+
+    apiChat.post('', payload)
+      .then((response) => {
+        setIsLoading(false)
+        console.info("Retorno OK da api send-message:", response.data)
       })
       .catch((error) => {
+        setIsLoading(false)
         console.error('Erro na chamada da api send/message:', error)
-        _showAlert('error', 'Ooops!', `Algo deu errado. ` + error, 7000);
+        onError(error)
       });
+  }
+
+  function onError(error) {
+    console.log("onError")
+    const statusCode = error.response?.status;
+
+    if (statusCode == 401) {
+      _showAlert('info', 'Ooops!', decodeMessage(statusCode), 4000);
+      navigation.navigate('SignInTab')
+    }
+    _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 7000);
   }
 
   const onSend = useCallback((messages = []) => {
@@ -72,21 +96,28 @@ const ChatScreen = ({ route, navigation }) => {
   }, []);
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={onSend}
-      alignTop
-      alwaysShowSend
-      scrollToBottom
-      renderAvatarOnTop
-      placeholder={'Digite uma mensagem'}
-      renderSend={renderCustomSend}
-      messagesContainerStyle={{ backgroundColor: '#DCDCDC' }}
-      textInputStyle={{ color: 'black', backgroundColor: 'white' }}
-      user={{
-        _id: user.id,
-      }}
-    />
+    isLoading ?
+      < View >
+        <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
+      </View >
+
+      :
+
+      <GiftedChat
+        messages={messages}
+        onSend={onSend}
+        alignTop
+        alwaysShowSend
+        scrollToBottom
+        renderAvatarOnTop
+        placeholder={'Digite uma mensagem'}
+        renderSend={renderCustomSend}
+        messagesContainerStyle={{ backgroundColor: '#DCDCDC' }}
+        textInputStyle={{ color: 'black', backgroundColor: 'white' }}
+        user={{
+          _id: user.id,
+        }}
+      />
   )
 }
 

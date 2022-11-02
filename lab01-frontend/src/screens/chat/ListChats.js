@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet,TouchableWithoutFeedback, RefreshControl, ScrollView } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableWithoutFeedback, RefreshControl, ScrollView } from "react-native";
 import UserAvatar from 'react-native-user-avatar';
 import moment from 'moment-timezone';
 moment.localeData('pr-br')
@@ -13,26 +13,18 @@ const ListChats = ({ chats, onClick, onRefresh, refreshing }) => {
 
     function Item({ item }) {
         return (
-            <ScrollView
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }>
-                <TouchableWithoutFeedback onPress={() => { onClick(item) }}>
-                    <View style={styles.listItem}>
-                        <UserAvatar size={45} name={item.userConversation.name} bgColors={['#007bb6']} />
-                        <View style={{ alignItems: "center", flex: 1 }}>
-                            <Text style={{ fontWeight: "bold", alignSelf: "flex-start", marginLeft: 10 }}>{item.userConversation.name}</Text>
-                            <Text style={{ alignSelf: "flex-start", marginLeft: 10 }} >{item.text}</Text>
-                        </View>
-                        <View style={{ alignItems: "center", flex: 1 }}>
-                            <Text style={{ alignSelf: "flex-end", marginLeft: 0, fontSize: 11 }} >{formatdate(item.createdAt)}</Text>
-                        </View>
+            <TouchableWithoutFeedback onPress={() => { onClick(item) }}>
+                <View style={styles.listItem}>
+                    <UserAvatar size={45} name={item.userConversation.name} bgColors={['#007bb6']} />
+                    <View style={{ alignItems: "center", flex: 1 }}>
+                        <Text style={{ fontWeight: "bold", alignSelf: "flex-start", marginLeft: 10 }}>{item.userConversation.name}</Text>
+                        <Text style={{ alignSelf: "flex-start", marginLeft: 10 }} >{item.text}</Text>
                     </View>
-                </TouchableWithoutFeedback>
-            </ScrollView>
+                    <View style={{ alignItems: "center", flex: 1 }}>
+                        <Text style={{ alignSelf: "flex-end", marginLeft: 0, fontSize: 11 }} >{formatdate(item.createdAt)}</Text>
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
         );
     }
 
@@ -42,6 +34,12 @@ const ListChats = ({ chats, onClick, onRefresh, refreshing }) => {
             data={chats}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={item => item.chatId.toString()}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }
         />
     )
 };

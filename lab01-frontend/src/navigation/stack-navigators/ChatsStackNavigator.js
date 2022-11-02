@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { screens } from '../RouteItems'
 import ChatScreen from '../../screens/chat/ChatScreen'
 import ChatsScreen from '../../screens/chat/ChatsScreen'
+import SignInScreen from '../../screens/SignInScreen'
 
 const Stack = createStackNavigator()
 
@@ -24,6 +25,7 @@ const ChatsStackNavigator = () => {
       }>
       <Stack.Screen name={screens.ChatsTab} component={ChatsScreen} options={{ title: 'Chats' }} />
       <Stack.Screen name={screens.Chat} component={ChatScreen} options={{ title: 'Chat' }} />
+      <Stack.Screen name={screens.SignInTab} component={SignInScreen} options={{ title: 'Login' }} />
 
     </Stack.Navigator>
   )
