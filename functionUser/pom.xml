@@ -60,7 +60,11 @@
             <version>1.0.0</version>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>1.11.408</version>
+        </dependency>
 
     </dependencies>
 

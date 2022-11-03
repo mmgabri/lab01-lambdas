@@ -1,6 +1,6 @@
 package com.mmgabri.services;
 
-import com.mmgabri.adapter.database.RepositoryDynamoDB;
+import com.mmgabri.adapter.database.RepositoryAnuncio;
 import com.mmgabri.adapter.files.S3FileServiceImpl;
 import com.mmgabri.domain.AnuncioRequest;
 import com.mmgabri.domain.AnuncioResponse;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnuncioServiceImpl implements AnuncioService<AnuncioRequest, AnuncioResponse> {
     private final S3FileServiceImpl fileService;
-    private final RepositoryDynamoDB repo;
+    private final RepositoryAnuncio repo;
     private final Mapper map;
 
     @Override

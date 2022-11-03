@@ -10,10 +10,12 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder
 import com.amazonaws.services.cognitoidp.model.*;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import mmgabri.domain.*;
+import mmgabri.domain.payload.ConfirmSignupRequest;
+import mmgabri.domain.payload.SigninRequest;
+import mmgabri.domain.payload.SignupRequest;
 import mmgabri.exceptions.ConfirmationCodeInvalildException;
-import mmgabri.exceptions.RequestDeniedException;
 import mmgabri.exceptions.InvalidPasswordException;
+import mmgabri.exceptions.RequestDeniedException;
 import mmgabri.exceptions.UserAlreadyExistsException;
 import mmgabri.lambda.Handler;
 import mmgabri.services.AuthService;
@@ -49,22 +51,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public SignupResponse signUp(SignupRequest request) {
-        AttributeType i1 = new AttributeType();
-        i1.setName("name");
-        i1.setValue(request.getName());
-        AttributeType i2 = new AttributeType();
-        i2.setName("email");
-        i2.setValue(request.getEmail());
+    public SignUpResult signUp(SignupRequest request) {
+        AttributeType attributeType1 = new AttributeType();
+        attributeType1.setName("name");
+        attributeType1.setValue(request.getName());
+        AttributeType attributeType2 = new AttributeType();
+        attributeType2.setName("email");
+        attributeType2.setValue(request.getEmail());
 
         SignUpRequest response = new SignUpRequest().withClientId(CLIENT_ID)
                 .withUsername(request.getEmail())
                 .withPassword(request.getPassword())
-                .withUserAttributes(i1)
-                .withUserAttributes(i2);
+                .withUserAttributes(attributeType1)
+                .withUserAttributes(attributeType2);
         try {
-            SignUpResult result = clientCognito.signUp(response);
-            return new SignupResponse("Successfully signup", result.getUserSub());
+            return clientCognito.signUp(response);
         } catch (UsernameExistsException e) {
             logger.error("Erro client Cognito: " + e.getErrorMessage());
             throw new UserAlreadyExistsException(USER_NAME_EXISTS.getDescricao());
@@ -75,13 +76,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ConfirmSignupResponse confirmSignUp(ConfirmSignupRequest request) {
+    public void confirmSignUp(ConfirmSignupRequest request) {
         ConfirmSignUpRequest confirmSignUpRequest = new ConfirmSignUpRequest()
                 .withClientId(CLIENT_ID).withUsername(request.getEmail())
                 .withConfirmationCode(request.getConfirmationCode());
         try {
             clientCognito.confirmSignUp(confirmSignUpRequest);
-            return new ConfirmSignupResponse("Successfully confirm signup");
         } catch (CodeMismatchException e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new ConfirmationCodeInvalildException(CODE_MISMATCH.getDescricao());
@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @SneakyThrows
-    public SigninResponse signin(SigninRequest request) {
+    public AdminInitiateAuthResult signin(SigninRequest request) {
 
         Map<String, String> authParams = new LinkedHashMap<String, String>() {{
             put("USERNAME", request.getEmail());
@@ -109,22 +109,7 @@ public class AuthServiceImpl implements AuthService {
                 .withClientId(CLIENT_ID)
                 .withAuthParameters(authParams);
         try {
-            AdminInitiateAuthResult authResult = clientCognito.adminInitiateAuth(authRequest);
-            AuthenticationResultType resultType = authResult.getAuthenticationResult();
-
-            UserDomain user = getUser(resultType.getAccessToken());
-
-            SigninResponse signinResponse = new SigninResponse();
-            signinResponse.setId(user.getId());
-            signinResponse.setEmail(user.getEmail());
-            signinResponse.setUserName(user.getUserName());
-            signinResponse.setAccessToken(resultType.getAccessToken());
-            signinResponse.setIdToken(resultType.getIdToken());
-            signinResponse.setRefreshToken(resultType.getRefreshToken());
-            signinResponse.setMessage("Successfully signin");
-
-            return signinResponse;
-
+            return clientCognito.adminInitiateAuth(authRequest);
         } catch (NotAuthorizedException e) {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new InvalidPasswordException(NOT_AUTHORIZED.getDescricao());
@@ -132,30 +117,5 @@ public class AuthServiceImpl implements AuthService {
             logger.error("Erro client Cognito: " + e.getCause());
             throw new RequestDeniedException(ERROR_SYSTEM.getDescricao());
         }
-    }
-
-    @Override
-    public UserDomain getUser(String acessToken) {
-        GetUserRequest user = new GetUserRequest();
-        user.setAccessToken(acessToken);
-        GetUserResult userResult = clientCognito.getUser(user);
-
-        UserDomain userDomain = new UserDomain();
-
-        for (int i = 0; i < userResult.getUserAttributes().size(); i++) {
-            switch (userResult.getUserAttributes().get(i).getName()) {
-                case "sub" :
-                    userDomain.setId(userResult.getUserAttributes().get(i).getValue());
-                    break;
-                case "email" :
-                    userDomain.setEmail(userResult.getUserAttributes().get(i).getValue());
-                    break;
-                case "name" :
-                    userDomain.setUserName(userResult.getUserAttributes().get(i).getValue());
-                    break;
-            }
-        }
-
-        return userDomain;
     }
 }

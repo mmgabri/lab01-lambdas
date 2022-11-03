@@ -18,8 +18,8 @@ import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB_NOTFOUND;
 
 @AllArgsConstructor
-public class RepositoryDynamoDB implements Repository<AnuncioEntity> {
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryDynamoDB.class);
+public class RepositoryAnuncio implements Repository<AnuncioEntity> {
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryAnuncio.class);
     private final DynamoDBMapper mapper;
 
     @Override

@@ -1,11 +1,14 @@
 package com.mmgabri.services;
 
+import com.mmgabri.adapter.database.RepositoryUserImpl;
 import com.mmgabri.domain.ChatResponse;
 import com.mmgabri.domain.MessageResponse;
 import com.mmgabri.domain.SendMessageRequest;
 import com.mmgabri.domain.UserPayload;
 import com.mmgabri.domain.entity.ChatEntity;
 import com.mmgabri.domain.entity.MessageDocumentDB;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.time.LocalDateTime;
@@ -14,7 +17,9 @@ import java.util.List;
 
 import static com.mmgabri.utils.Utils.generateUUID;
 
+@AllArgsConstructor
 public class Mapper {
+    private final RepositoryUserImpl repositoryUser;
     private static final String PREFIX_USER = "USER#";
     private static final String PREFIX_CHAT = "CHAT#";
     private static final String PREFIX_MESSAGE = "MESSAGE#";
@@ -85,7 +90,7 @@ public class Mapper {
     private ChatResponse formatChatResponse(ChatEntity chat, String userId) {
 
         return ChatResponse.builder()
-                .chatId(chat.getPk().substring(5))
+                .chatId(chat.getSk().substring(5))
                 .createdAt(chat.getCreatedAt())
                 .text(chat.getMessage().getText())
                 .userConversation(formartUser(chat, userId))
@@ -119,9 +124,7 @@ public class Mapper {
                 .userIdFrom(String.valueOf(request.getUserIdFrom()))
                 .userNameFrom(request.getUserNameFrom())
                 .userIdTo(String.valueOf(request.getUserIdTo()))
-                //TODO - Obter nome do UserNameTo acessando a tabela user
-                .userNameTo("TODO")
-                //.userNameTo(getNameUser(request.getUserIdTo()))
+                .userNameTo(repositoryUser.getById(request.getUserIdTo()).getUser().getName())
                 .createdAt(dateTime)
                 .build();
     }

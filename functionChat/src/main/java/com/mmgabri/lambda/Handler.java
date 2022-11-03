@@ -8,7 +8,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
-import com.mmgabri.adapter.database.RepositoryDynamoDB;
+import com.mmgabri.adapter.database.RepositoryChatImpl;
+import com.mmgabri.adapter.database.RepositoryUserImpl;
 import com.mmgabri.application.UseCase;
 import com.mmgabri.application.UseCaseImpl;
 import com.mmgabri.services.ChatServiceImpl;
@@ -24,8 +25,8 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
     public Handler() {
         useCase = new UseCaseImpl(
                 new ChatServiceImpl(
-                        new RepositoryDynamoDB(new DynamoDBMapper(client)),
-                        new Mapper(),
+                        new RepositoryChatImpl(new DynamoDBMapper(client)),
+                        new Mapper(new RepositoryUserImpl(new DynamoDBMapper(client))),
                         new Gson()),
                 new Gson());
     }

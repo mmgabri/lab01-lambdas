@@ -1,10 +1,13 @@
 package mmgabri.services;
 
+import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthResult;
+import com.amazonaws.services.cognitoidp.model.GetUserResult;
+import com.amazonaws.services.cognitoidp.model.SignUpResult;
 import mmgabri.domain.*;
+import mmgabri.domain.payload.*;
 
 public interface AuthService<A, O> {
-    SignupResponse signUp(SignupRequest request);
-    ConfirmSignupResponse confirmSignUp(ConfirmSignupRequest request);
-    SigninResponse signin(SigninRequest request);
-    UserDomain getUser (String acessToken);
+    SignUpResult signUp(SignupRequest request);
+    void confirmSignUp(ConfirmSignupRequest request);
+    AdminInitiateAuthResult signin(SigninRequest request);
 }

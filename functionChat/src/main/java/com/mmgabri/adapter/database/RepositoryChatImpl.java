@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.mmgabri.domain.entity.ChatEntity;
 import com.mmgabri.exceptions.BusinessException;
-import com.mmgabri.services.Repository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +15,8 @@ import java.util.List;
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 
 @AllArgsConstructor
-public class RepositoryDynamoDB implements Repository<ChatEntity> {
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryDynamoDB.class);
+public class RepositoryChatImpl implements com.mmgabri.services.RepositoryChat<ChatEntity> {
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryChatImpl.class);
     private final DynamoDBMapper mapper;
 
     private static final String PREFIX_USER = "USER#";
@@ -25,7 +24,13 @@ public class RepositoryDynamoDB implements Repository<ChatEntity> {
 
     @Override
     public void sendMessage(List<ChatEntity> chats) {
-        mapper.batchSave(chats);
+        try {
+            mapper.batchSave(chats);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (batchSave) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
+
     }
 
     @Override
@@ -43,7 +48,7 @@ public class RepositoryDynamoDB implements Repository<ChatEntity> {
         try {
             return mapper.query(ChatEntity.class, queryExpression);
         } catch (Exception e) {
-            logger.error(ERROR_DYNAMODB.getDescricao() + " (getChatsByUser) Exception:" + e);
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query) Exception:" + e);
             throw new BusinessException(ERROR_DYNAMODB.getDescricao());
         }
     }
@@ -64,7 +69,7 @@ public class RepositoryDynamoDB implements Repository<ChatEntity> {
         try {
             return mapper.query(ChatEntity.class, queryExpression);
         } catch (Exception e) {
-            logger.error(ERROR_DYNAMODB.getDescricao() + " (getChatsByUser) Exception:" + e);
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (query - GSI_01) Exception:" + e);
             throw new BusinessException(ERROR_DYNAMODB.getDescricao());
         }
     }

@@ -9,7 +9,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.gson.Gson;
-import com.mmgabri.adapter.database.RepositoryDynamoDB;
+import com.mmgabri.adapter.database.RepositoryAnuncio;
 import com.mmgabri.adapter.files.S3FileServiceImpl;
 import com.mmgabri.application.UseCase;
 import com.mmgabri.application.UseCaseImpl;
@@ -31,7 +31,7 @@ public class Handler implements RequestHandler<APIGatewayProxyRequestEvent, APIG
                         new Gson()),
                 new AnuncioServiceImpl(
                         new S3FileServiceImpl(AmazonS3ClientBuilder.standard().build(), BUCKET_NAME),
-                        new RepositoryDynamoDB(new DynamoDBMapper(client)),
+                        new RepositoryAnuncio(new DynamoDBMapper(client)),
                         new Mapper()),
                 new Gson());
     }

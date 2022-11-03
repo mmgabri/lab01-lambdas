@@ -1,4 +1,4 @@
-package mmgabri.domain;
+package mmgabri.domain.payload;
 
 import lombok.Builder;
 import lombok.Data;

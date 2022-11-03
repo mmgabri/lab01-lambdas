@@ -1,7 +1,7 @@
 package com.mmgabri.services;
 
 import com.google.gson.Gson;
-import com.mmgabri.adapter.database.RepositoryDynamoDB;
+import com.mmgabri.adapter.database.RepositoryChatImpl;
 import com.mmgabri.domain.ChatResponse;
 import com.mmgabri.domain.MessageResponse;
 import com.mmgabri.domain.SendMessageRequest;
@@ -18,7 +18,7 @@ import static com.mmgabri.utils.Utils.generateUUID;
 public class ChatServiceImpl implements ChatService<SendMessageRequest, ChatResponse, MessageResponse> {
     private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
 
-    private final RepositoryDynamoDB repo;
+    private final RepositoryChatImpl repo;
     private final Mapper map;
     private final Gson gson;
 
