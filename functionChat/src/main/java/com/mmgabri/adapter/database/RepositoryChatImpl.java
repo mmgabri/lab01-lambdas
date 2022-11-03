@@ -44,7 +44,6 @@ public class RepositoryChatImpl implements com.mmgabri.services.RepositoryChat<C
                 .withKeyConditionExpression("pk = :value1")
                 .withExpressionAttributeValues(eav)
                 .withScanIndexForward(false);
-
         try {
             return mapper.query(ChatEntity.class, queryExpression);
         } catch (Exception e) {

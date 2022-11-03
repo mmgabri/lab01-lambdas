@@ -1,5 +1,6 @@
 package com.mmgabri.services;
 
+import com.fasterxml.uuid.Generators;
 import com.mmgabri.adapter.database.RepositoryUserImpl;
 import com.mmgabri.domain.ChatResponse;
 import com.mmgabri.domain.MessageResponse;
@@ -8,12 +9,13 @@ import com.mmgabri.domain.UserPayload;
 import com.mmgabri.domain.entity.ChatEntity;
 import com.mmgabri.domain.entity.MessageDocumentDB;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.mmgabri.utils.Utils.generateUUID;
 
@@ -31,13 +33,13 @@ public class Mapper {
         }
 
         String chatId = generateUUID(request.getUserIdFrom(), request.getUserIdTo()).toString();
-        MessageDocumentDB message = formatMessage(request, request.getCreatedAt());
+        MessageDocumentDB message = formatMessage(request);
 
         List<ChatEntity> chats = new ArrayList<>();
 
         chats.add(formatChat(PREFIX_USER + request.getUserIdFrom(),  PREFIX_CHAT + chatId, message, request.getCreatedAt()));
         chats.add(formatChat(PREFIX_USER + request.getUserIdTo(), PREFIX_CHAT + chatId, message, request.getCreatedAt()));
-        chats.add(formatChat(PREFIX_CHAT + chatId, PREFIX_MESSAGE + request.getCreatedAt(), message, request.getCreatedAt()));
+        chats.add(formatChat(PREFIX_CHAT + chatId, PREFIX_MESSAGE + message.getIdMessage(), message, request.getCreatedAt()));
 
         return chats;
 
@@ -116,16 +118,16 @@ public class Mapper {
         return msg;
     }
 
-    private MessageDocumentDB formatMessage(SendMessageRequest request, String dateTime) {
+    private MessageDocumentDB formatMessage(SendMessageRequest request) {
 
         return MessageDocumentDB.builder()
-                .idMessage(dateTime)
+                .idMessage(generateMessageId())
                 .text(request.getText())
                 .userIdFrom(String.valueOf(request.getUserIdFrom()))
                 .userNameFrom(request.getUserNameFrom())
                 .userIdTo(String.valueOf(request.getUserIdTo()))
                 .userNameTo(repositoryUser.getById(request.getUserIdTo()).getUser().getName())
-                .createdAt(dateTime)
+                .createdAt(request.getCreatedAt())
                 .build();
     }
 
@@ -137,5 +139,12 @@ public class Mapper {
                 .createdAt(createdAt)
                 .message(message)
                 .build();
+    }
+
+    private String generateMessageId () {
+        UUID uuid= Generators.timeBasedGenerator().generate();
+        Long ts = uuid.timestamp();
+        String randomizedString = RandomStringUtils.randomAlphanumeric(5);
+        return  ts + "-" + randomizedString;
     }
 }

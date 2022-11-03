@@ -16,7 +16,7 @@ public class MessageDocumentDB {
     private String text;
     private String userIdFrom;
     private String userNameFrom;
-    private String userIdTo;
     private String userNameTo;
+    private String userIdTo;
     private String createdAt;
 }

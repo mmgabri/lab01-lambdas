@@ -57,12 +57,13 @@ const ChatScreen = ({ route, navigation }) => {
       createdAt: msg[0].createdAt,
       text: msg[0].text,
       userIdFrom: user.id,
-      userNameFrom: user.username,
+      userNameFrom: user.userName,
       userIdTo: userIdTo
     }
 
     setIsLoading(true)
 
+    console.log("Payload Send Message:" , payload)
     apiChat.post('', payload)
       .then((response) => {
         setIsLoading(false)
@@ -98,18 +99,18 @@ const ChatScreen = ({ route, navigation }) => {
   return (
     isLoading ?
       < View >
-        <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
+        <AwesomeLoading indicatorId={8} size={50} isActive={true} text="" />
       </View >
 
       :
 
       <GiftedChat
         messages={messages}
+        inverted ={true}
+        alignTop={true} 
+        alwaysShowSend={true}
         onSend={onSend}
-        alignTop
-        alwaysShowSend
         scrollToBottom
-        renderAvatarOnTop
         placeholder={'Digite uma mensagem'}
         renderSend={renderCustomSend}
         messagesContainerStyle={{ backgroundColor: '#DCDCDC' }}
