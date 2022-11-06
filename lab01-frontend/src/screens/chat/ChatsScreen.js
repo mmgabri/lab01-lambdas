@@ -64,7 +64,7 @@ const ChatScreen = ({ navigation }) => {
 
     isLoading ?
       < View >
-        <AwesomeLoading indicatorId={8} size={50} isActive={true} text="" />
+        <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
       </View >
 
       :

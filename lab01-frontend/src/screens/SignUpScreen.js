@@ -93,7 +93,9 @@ const SignUpScreen = () => {
     });
   }
 
-  const validateEmail = (email) => {
+  const validateEmail = (emailInp) => {
+    let email = emailInp.trim()
+
     const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return expression.test(String(email).toLowerCase())
   }
@@ -123,10 +125,11 @@ const SignUpScreen = () => {
     }
 
     if (data.username && emailIsValid && data.password && data.confirm_password && data.confirm_password == data.password) {
-      signUp(data.email, data.password, data.username)
+      let emailLowerCase = data.email.toLowerCase();
+      let email = emailLowerCase.trim()
+      signUp(email, data.password, data.username)
     }
   }
-
 
   return (
 

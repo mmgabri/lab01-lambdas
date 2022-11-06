@@ -42,7 +42,6 @@ const AuthProvider = ({ children, navigation }) => {
             //  console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
                 setUser(storageUser)
-                console.info('idToken -->', storageUser.idToken)
                 apiUser.defaults.headers.authorization = storageUser.idToken;
                 apiAnuncio.defaults.headers.Authorization = storageUser.idToken;
                 apiChat.defaults.headers.authorization = storageUser.idToken;
@@ -158,7 +157,7 @@ const AuthProvider = ({ children, navigation }) => {
     }
 
     async function signOut() {
-        console.log('---- Entrou no signOut ----', user)
+        console.log('---- Entrou no signOut ----')
         notAuthenticated();
     }
 
@@ -186,7 +185,7 @@ const AuthProvider = ({ children, navigation }) => {
 
         isLoading ?
             < View >
-                <AwesomeLoading indicatorId={8} size={50} isActive={true} text="" />
+                <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
             </View >
 
             :

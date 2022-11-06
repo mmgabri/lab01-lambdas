@@ -32,7 +32,7 @@ const HomeScreen = ({ navigation }) => {
     console.log('--obtem anuncios--')
     apiAnuncio.get('')
       .then((response) => {
-        console.log("Response:" , response.data)
+     //   console.log("Response:" , response.data)
         setAnuncio(response.data)
         setRefreshing(false)
       })

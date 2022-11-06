@@ -21,8 +21,11 @@ const SignInScreen = ({ navigation }) => {
 
   const { colors } = useTheme();
 
-  const validateEmail = (email) => {
+  const validateEmail = (emailInp) => {
+    let email = emailInp.trim()
+
     const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
     return expression.test(String(email).toLowerCase())
   }
 
@@ -75,7 +78,7 @@ const SignInScreen = ({ navigation }) => {
     }
   }
 
-  function signInHandle () {
+  function signInHandle() {
 
     console.log("signInHandle")
 
@@ -90,8 +93,10 @@ const SignInScreen = ({ navigation }) => {
     }
 
     if (emailIsValid && data.password) {
-       signIn(data.email, data.password)
-       console.log("lOGIN CONCLUIDO")
+      let emailLowerCase = data.email.toLowerCase();
+      let email = emailLowerCase.trim()
+      signIn(email, data.password)
+      console.log("lOGIN CONCLUIDO")
     }
   }
 

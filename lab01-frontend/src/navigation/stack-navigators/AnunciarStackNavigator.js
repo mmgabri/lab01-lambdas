@@ -13,6 +13,7 @@ import AnunciarImagensScreen from '../../screens/anunciar/AnunciarImagensScreen'
 import AnunciarConfirmScreen from '../../screens/anunciar/AnunciarConfirmScreen'
 import MeusAnunciosScreen from '../../screens/MeusAnunciosScreen'
 import SignInScreen from '../../screens/SignInScreen'
+import SignUpScreen from '../../screens/SignUpScreen'
 import HomeScreen from '../../screens/HomeScreen'
 
 const Stack = createStackNavigator()
@@ -43,6 +44,7 @@ const HomeStackNavigator = () => {
       <Stack.Screen name={screens.AnunciarConfirm} component={AnunciarConfirmScreen} options={{ title: 'Anunciar - Confirmação' }} />
       <Stack.Screen name={screens.MeusAnuncios} component={MeusAnunciosScreen} options={{ title: 'Meus anúncios' }} />
       <Stack.Screen name={screens.SignInTab} component={SignInScreen} options={{ title: 'Login' }} />
+      <Stack.Screen name={screens.SignUp} component={SignUpScreen} options={{ title: 'Cadastro' }} />
       <Stack.Screen name={screens.Home} component={HomeScreen}  />
 
     </Stack.Navigator>

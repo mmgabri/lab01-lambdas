@@ -5,6 +5,7 @@ logs/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/android/java_pid11556.hprof
 LOG.txt
 .aws-sam/
 samconfig.toml
