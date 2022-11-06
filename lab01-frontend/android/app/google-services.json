@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "203414549218",
+    "project_id": "rnpushnotificationslab01",
+    "storage_bucket": "rnpushnotificationslab01.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203414549218:android:8205f0e6e9d3c81ec0a4bb",
+        "android_client_info": {
+          "package_name": "com.lab01"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "203414549218-e49bcb1slgu6o38g6jtdom18s78ua9t2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0DRvmybgfo61knrkPfNIJ3IH8X_uRUYM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "203414549218-e49bcb1slgu6o38g6jtdom18s78ua9t2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
