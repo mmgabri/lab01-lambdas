@@ -57,6 +57,13 @@ public class UseCaseImpl implements UseCase<APIGatewayProxyRequestEvent, APIGate
                 }catch (Exception e) {
                     return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
                 }
+            case "/users/registeradvice":
+                try {
+                    service.registerAdvice(gson.fromJson(event.getBody(), RegisterAdviceRequest.class));
+                    return builderResponse(200, gson.toJson(builderBodyResponse("Sucess!")));
+                }catch (Exception e) {
+                    return builderResponse(400, gson.toJson(builderBodyResponse(e.getMessage())));
+                }
             default:
                 break;
         }

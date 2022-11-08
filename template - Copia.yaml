@@ -35,6 +35,9 @@ Parameters:
   ParameterTableNameChat:
     Type: String
     Default: chat
+  ParameterTableNameUser:
+    Type: String
+    Default: user
   ParameterLambdaAnuncioName:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
@@ -123,12 +126,15 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref ParameterLambdaUserName
-      CodeUri: userFunction
+      CodeUri: functionUser
       Handler: mmgabri.lambda.Handler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
       MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ParameterTableNameUser
       Environment:
         Variables:
           CLIENT_ID: !Ref ParameterClientId
@@ -172,7 +178,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref ParameterLambdaAnuncioName
-      CodeUri: anuncioFunction
+      CodeUri: functionAnuncio
       Handler: com.mmgabri.lambda.Handler::handleRequest
       Runtime: java11
       Architectures:
@@ -248,12 +254,11 @@ Resources:
       Architectures:
         - x86_64
       MemorySize: 512
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref ParameterTableNameChat
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ParameterTableNameChat
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ParameterTableNameUser
       Events:
         SendMessage:
           Type: Api
@@ -354,6 +359,40 @@ Resources:
         - IndexName: "GSI_01"
           KeySchema: 
             - AttributeName: "pk"
+              KeyType: "HASH"
+            - AttributeName: "date_time_created"
+              KeyType: "RANGE"
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+
+  #Table DynamoDB User
+  TableUser: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "user_id"
+          AttributeType: "S"
+        - AttributeName: "email"
+          AttributeType: "S"
+        - AttributeName: "date_time_created"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "user_id"
+          KeyType: "HASH"
+        - AttributeName: "date_time_created"
+          KeyType: "RANGE"    
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: !Ref ParameterTableNameUser
+
+      GlobalSecondaryIndexes: 
+        - IndexName: "GSI_01"
+          KeySchema: 
+            - AttributeName: "email"
               KeyType: "HASH"
             - AttributeName: "date_time_created"
               KeyType: "RANGE"

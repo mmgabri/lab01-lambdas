@@ -9,7 +9,6 @@ import mmgabri.adapter.AuthServiceImpl;
 import mmgabri.adapter.RepositoryUser;
 import mmgabri.domain.entity.UserEntity;
 import mmgabri.domain.payload.*;
-import mmgabri.exceptions.BusinessException;
 import mmgabri.exceptions.UserAlreadyExistsException;
 import mmgabri.exceptions.UserNotFoundException;
 import mmgabri.lambda.Handler;
@@ -67,14 +66,24 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     public SigninResponse signin(SigninRequest request) {
 
+        List<UserEntity> listUser = repo.getByEmail(request.getEmail());
+        UserEntity user = validAndGetReturn(listUser);
+
         AdminInitiateAuthResult authResult = auth.signin(request);
 
         AuthenticationResultType resultType = authResult.getAuthenticationResult();
 
-        List<UserEntity> listUser = repo.getByEmail(request.getEmail());
+        return mapper.mapSigninResponse(user, resultType);
+    }
+
+    @Override
+    public void registerAdvice(RegisterAdviceRequest request) {
+        List<UserEntity> listUser = repo.getById(request.getUserId());
         UserEntity user = validAndGetReturn(listUser);
 
-        return mapper.mapSigninResponse(user, resultType);
+        user.getUser().setTokenNotification(request.getTokenNotification());
+
+        repo.save(user);
     }
 
     private UserEntity validAndGetReturn(List<UserEntity> listUser) {

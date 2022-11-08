@@ -50,6 +50,10 @@ Parameters:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
     Default: chat-function
+  ParameterLambdaChatDDBStreamName:   
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
+    Default: streamDDB-chat-function
   ParameterApiGatewayName:
     Type: String
     AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
@@ -106,10 +110,10 @@ Resources:
         - ApiId: !Ref ApiGateway
           Stage: !Ref ParameterApiGatewayStageName
       Quota:
-        Limit: 1000
+        Limit: 10000
         Period: MONTH
       Throttle:
-        BurstLimit: 20
+        BurstLimit: 30
         RateLimit: 10
       UsagePlanName: !Join ["", [{"Ref": "AWS::StackName"}, "-usage-plan"]]  
 
@@ -170,6 +174,12 @@ Resources:
           Type: Api
           Properties:
             Path: /users/signout
+            RestApiId: !Ref ApiGateway
+            Method: post
+        RegisterAdvice:
+          Type: Api
+          Properties:
+            Path: /users/registeradvice
             RestApiId: !Ref ApiGateway
             Method: post
 
@@ -286,6 +296,29 @@ Resources:
                   Required: true    
             RestApiId: !Ref ApiGateway
 
+  #------------ Lambda Function - Chat DynamoDB Stream ------------#
+  ChatDDBStreamFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref ParameterLambdaChatDDBStreamName
+      CodeUri: functionChatDDBStream
+      Handler: com.mmgabri.lambda.Handler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies: AWSLambdaDynamoDBExecutionRole
+      Events:
+        Stream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt TableChat.StreamArn
+            BatchSize: 1
+            StartingPosition: TRIM_HORIZON
+            FilterCriteria:
+              Filters: 
+                - Pattern: '{"dynamodb": {"Keys": {"sk": { "S": [{ "prefix": "MESSAGE#" }] }}}}'
+
   #Table DynamoDB Anuncio
   TableAnuncio: 
     Type: AWS::DynamoDB::Table
@@ -353,6 +386,8 @@ Resources:
       ProvisionedThroughput: 
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
       TableName: !Ref ParameterTableNameChat
 
       GlobalSecondaryIndexes: 
@@ -367,7 +402,7 @@ Resources:
           ProvisionedThroughput: 
             ReadCapacityUnits: "5"
             WriteCapacityUnits: "5"
-
+   
   #Table DynamoDB User
   TableUser: 
     Type: AWS::DynamoDB::Table

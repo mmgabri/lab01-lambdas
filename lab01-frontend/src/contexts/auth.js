@@ -9,7 +9,7 @@ import FieldForm from '../components/FieldForm';
 import AwesomeLoading from 'react-native-awesome-loading';
 import { decodeMessage } from '../services/decodeMessage'
 import { apiUser, apiAnuncio, apiChat } from '../services/api';
-import { setUserStorage, getUserStorage, removeUserStorage } from '../services/localStorageService'
+import { setUserStorage, getUserStorage, removeUserStorage, getTokenNotification } from '../services/localStorageService'
 import stylesCommon from '../components/stylesCommon'
 import { showMessage, hideMessage } from "react-native-flash-message";
 
@@ -39,7 +39,7 @@ const AuthProvider = ({ children, navigation }) => {
         apiChat.defaults.timeout = 25000;
         const loadStorageData = async () => {
             const storageUser = await getUserStorage();
-            //  console.info('Usuário obtido do storage -->', storageUser)
+            //console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
                 setUser(storageUser)
                 apiUser.defaults.headers.authorization = storageUser.idToken;
@@ -49,6 +49,7 @@ const AuthProvider = ({ children, navigation }) => {
             }
         };
         loadStorageData();
+        registerAdvive();
     }, [])
 
     function setLoading(value) {
@@ -85,7 +86,6 @@ const AuthProvider = ({ children, navigation }) => {
             setIsLoading(false)
             const statusCode = error.response?.status
             _showAlert('danger', 'Ooops!', decodeMessage(statusCode), 5000);
-
         }
     }
 
@@ -119,6 +119,7 @@ const AuthProvider = ({ children, navigation }) => {
 
     function signIn(email, password) {
         console.log('---- Entrou no signIn ----')
+
         notAuthenticated();
         setIsLoading(true)
 
@@ -145,6 +146,7 @@ const AuthProvider = ({ children, navigation }) => {
                 _showAlert('success', 'Bem vindo !', '', 3000);
                 setIsAuthenticated(true)
                 setIsLoading(false)
+                registerAdvive()
             })
             .catch((error) => {
                 console.error('Erro na api signin:', error)
@@ -159,6 +161,23 @@ const AuthProvider = ({ children, navigation }) => {
     async function signOut() {
         console.log('---- Entrou no signOut ----')
         notAuthenticated();
+    }
+
+    async function registerAdvive() {
+
+        const storageTokenNotification = await getTokenNotification();
+
+        console.log('---- Entrou registerAdvive ----' , user.id , storageTokenNotification.token )
+
+        if (storageTokenNotification && user.id) {
+            apiUser.post('/registeradvice', { userId: user.id, tokenNotification: storageTokenNotification.token })
+            .then((response) => {
+                console.info('Sucesso na chamada da api /registeradvice:', response.data)
+            })
+            .catch((error) => {
+                console.error('Erro na chamada da api /registeradvice: ', error)
+            });
+        }
     }
 
     async function notAuthenticated() {
@@ -185,7 +204,7 @@ const AuthProvider = ({ children, navigation }) => {
 
         isLoading ?
             < View >
-                <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
+                <AwesomeLoading indicatorId={8} size={50} isActive={true} text="" />
             </View >
 
             :

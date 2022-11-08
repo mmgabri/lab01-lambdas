@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
-import static mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB_NOTFOUND;
 
 @AllArgsConstructor
 public class RepositoryUser implements Repository<UserEntity> {
@@ -28,6 +27,25 @@ public class RepositoryUser implements Repository<UserEntity> {
             mapper.save(user);
         } catch (Exception e) {
             logger.error(ERROR_DYNAMODB.getDescricao() + " (save) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
+    }
+
+    @Override
+    public List<UserEntity> getById(String userId) {
+        HashMap<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":value1", new AttributeValue().withS(userId));
+
+        DynamoDBQueryExpression<UserEntity> queryExpression = new DynamoDBQueryExpression<UserEntity>()
+                .withConsistentRead(false)
+                .withKeyConditionExpression("user_id = :value1")
+                .withExpressionAttributeValues(eav)
+                .withScanIndexForward(false);
+
+        try {
+            return mapper.query(UserEntity.class, queryExpression);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (getById) Exception:" + e);
             throw new BusinessException(ERROR_DYNAMODB.getDescricao());
         }
     }
@@ -48,7 +66,7 @@ public class RepositoryUser implements Repository<UserEntity> {
         try {
             return mapper.query(UserEntity.class, queryExpression);
         } catch (Exception e) {
-            logger.error(ERROR_DYNAMODB.getDescricao() + " (query - GSI_01) Exception:" + e);
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (getByEmail - GSI_01) Exception:" + e);
             throw new BusinessException(ERROR_DYNAMODB.getDescricao());
         }
     }

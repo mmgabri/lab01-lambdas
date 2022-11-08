@@ -1,11 +1,10 @@
-package mmgabri.domain.entity;
+package com.mmgabri.domain.entity;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import mmgabri.domain.enuns.AccountStatusEnun;
 
 @Data
 @SuperBuilder

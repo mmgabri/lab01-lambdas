@@ -61,7 +61,7 @@ const ChatScreen = ({ route, navigation }) => {
       userIdTo: userIdTo
     }
 
-    setIsLoading(true)
+   // setIsLoading(true)
 
     apiChat.post('', payload)
       .then((response) => {
@@ -98,7 +98,7 @@ const ChatScreen = ({ route, navigation }) => {
   return (
     isLoading ?
       < View >
-        <AwesomeLoading indicatorId={11} size={80} isActive={true} text="" />
+        <AwesomeLoading indicatorId={8} size={50} isActive={true} text="" />
       </View >
 
       :

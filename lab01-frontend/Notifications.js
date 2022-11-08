@@ -1,12 +1,14 @@
 import PushNotificationIOS from "@react-native-community/push-notification-ios";
 import { Alert } from "react-native";
 import PushNotification from "react-native-push-notification";
+import { setTokenNotification } from './src/services/localStorageService'
 
 // Must be outside of any component LifeCycle (such as `componentDidMount`).
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
-    console.log("TOKEN:", token);
+    setTokenNotification(token)
+    //console.log("TOKEN:", token + useAut. );
   },
 
   // (required) Called when a remote is received or opened, or local notification is opened
@@ -14,7 +16,9 @@ PushNotification.configure({
     console.log("onNotification:", notification);
 
     if (notification.foreground){
-      Alert.alert(notification.message)
+      Alert.alert("Foreground --> " + notification.data.message)
+     // console.log("Foreground --> " + notification.data.message)
+    //  Alert.alert(token)
     }
 
     // process the notification

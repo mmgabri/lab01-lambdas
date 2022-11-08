@@ -1,0 +1,59 @@
+{
+    "records": [
+        {
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:146570171569:table/chat/stream/2022-11-07T12:53:44.791",
+            "eventID": "4ed8e8820e70050b47e1dc9b38cbc85d",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "approximateCreationDateTime": "Nov 7, 2022, 4:54:18 PM",
+                "keys": {
+                    "sk": {
+                        "s": "MESSAGE#138871328586120032-XadH6"
+                    },
+                    "pk": {
+                        "s": "CHAT#8e197082-de6f-5a01-bbe3-deaac95e2ee9"
+                    }
+                },
+                "newImage": {
+                    "sk": {
+                        "s": "MESSAGE#138871328586120032-XadH6"
+                    },
+                    "pk": {
+                        "s": "CHAT#8e197082-de6f-5a01-bbe3-deaac95e2ee9"
+                    },
+                    "date_time_created": {
+                        "s": "2022-11-07T13:54:17.397"
+                    },
+                    "message": {
+                        "m": {
+                            "userIdFrom": {
+                                "s": "9b8807b2-9781-4109-8714-ce7c9f06a98f"
+                            },
+                            "createdAt": {
+                                "s": "2022-11-07T13:54:17.397"
+                            },
+                            "idMessage": {
+                                "s": "138871328586120032-XadH6"
+                            },
+                            "userIdTo": {
+                                "s": "96975e79-ed31-4011-99e2-407965cef93f"
+                            },
+                            "text": {
+                                "s": "ddddddd"
+                            },
+                            "userNameTo": {
+                                "s": "Luciana "
+                            }
+                        }
+                    }
+                },
+                "sequenceNumber": "25690600000000018745667215",
+                "sizeBytes": 394,
+                "streamViewType": "NEW_IMAGE"
+            }
+        }
+    ]
+}
