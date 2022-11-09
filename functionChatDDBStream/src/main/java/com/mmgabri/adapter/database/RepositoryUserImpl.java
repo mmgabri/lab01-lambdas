@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 
@@ -18,6 +19,17 @@ import static com.mmgabri.domain.enuns.ExceptionsEnum.ERROR_DYNAMODB;
 public class RepositoryUserImpl implements RepositoryUser<UserEntity> {
     private static final Logger logger = LoggerFactory.getLogger(RepositoryUserImpl.class);
     private final DynamoDBMapper mapper;
+
+    @Override
+    public void save(UserEntity user) {
+
+        try {
+            mapper.save(user);
+        } catch (Exception e) {
+            logger.error(ERROR_DYNAMODB.getDescricao() + " (save) Exception:" + e);
+            throw new BusinessException(ERROR_DYNAMODB.getDescricao());
+        }
+    }
 
     @Override
     public UserEntity getById(String userId) {
@@ -32,7 +44,8 @@ public class RepositoryUserImpl implements RepositoryUser<UserEntity> {
                 .withScanIndexForward(false);
 
         try {
-            return mapper.query(UserEntity.class, queryExpression).get(0);
+            List<UserEntity> list = mapper.query(UserEntity.class, queryExpression);
+            return list.get(0);
         } catch (Exception e) {
             logger.error(ERROR_DYNAMODB.getDescricao() + " (query) Exception:" + e);
             throw new BusinessException(ERROR_DYNAMODB.getDescricao());

@@ -24,6 +24,10 @@ Parameters:
   ParameterUserPool:
     Type: String
     Default: "us-east-1_MsqKPhJ3m"
+  ParameterPlatformApplicationArn:
+    Description: ARN of the SNS
+    Type: "String"
+    Default: "arn:aws:sns:us-east-1:146570171569:app/GCM/PushNotificationsLab01"
   ParameterCognitoUserPoolArn:
     Description: ARN of the Cognito User Pool
     Type: "String"
@@ -196,7 +200,6 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          TABLE_NAME: !Ref ParameterTableNameAnuncio
           BUCKET_NAME: !Ref ParameterBucketName
       Policies:
         - DynamoDBCrudPolicy:
@@ -308,6 +311,9 @@ Resources:
         - x86_64
       MemorySize: 512
       Policies: AWSLambdaDynamoDBExecutionRole
+      Environment:
+        Variables:
+          PLATFORM_APPLICATION_ARN: !Ref ParameterPlatformApplicationArn
       Events:
         Stream:
           Type: DynamoDB

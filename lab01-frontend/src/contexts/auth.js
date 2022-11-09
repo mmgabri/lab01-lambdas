@@ -167,7 +167,9 @@ const AuthProvider = ({ children, navigation }) => {
 
         const storageTokenNotification = await getTokenNotification();
 
-        console.log('---- Entrou registerAdvive ----' , user.id , storageTokenNotification.token )
+        console.log('---- Entrou registerAdvive ----' )
+        console.log('Token: ' , storageTokenNotification.token )
+      //  console.log('User: ' , user )
 
         if (storageTokenNotification && user.id) {
             apiUser.post('/registeradvice', { userId: user.id, tokenNotification: storageTokenNotification.token })

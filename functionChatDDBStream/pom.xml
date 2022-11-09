@@ -80,12 +80,12 @@
             <artifactId>aws-java-sdk-dynamodb</artifactId>
             <version>1.11.408</version>
         </dependency>
+
         <dependency>
             <groupId>com.fasterxml.uuid</groupId>
             <artifactId>java-uuid-generator</artifactId>
             <version>4.0.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -101,9 +101,12 @@
             <artifactId>aws-java-sdk-sns</artifactId>
             <version>1.10.6</version>
         </dependency>
-        <!-- Thanks for using https://jar-download.com -->
-
-
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-tests</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -3,7 +3,8 @@ package com.mmgabri.domain.enuns;
 public enum ExceptionsEnum {
     ERROR_DYNAMODB("ErrorDynamoDB", "Erro no acesso ao banco de dados DynamoDB"),
     ERROR_DYNAMODB_NOTFOUND("ErrorDynamoDB", "Registro nao encontrado"),
-    ERROR_SYSTEM("ErrorSystem", "Ooops, algo deu errado. Tente novamente.");
+    ERROR_SYSTEM("ErrorSystem", "Ooops, algo deu errado. Tente novamente."),
+    ERROR_CLIENT_SNS("ErrorSNS", "Erro no client SNS");
 
     private String exception;
     private String descricao;

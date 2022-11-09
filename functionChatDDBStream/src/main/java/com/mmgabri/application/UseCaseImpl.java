@@ -1,59 +1,73 @@
 package com.mmgabri.application;
 
 import com.google.gson.Gson;
+import com.mmgabri.adapter.database.NotificationServiceImpl;
 import com.mmgabri.adapter.database.RepositoryUserImpl;
-import com.mmgabri.domain.Reponse;
 import com.mmgabri.domain.Request;
+import com.mmgabri.domain.Response;
 import com.mmgabri.domain.entity.UserEntity;
-import com.mmgabri.services.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
 
 @RequiredArgsConstructor
 public class UseCaseImpl {
     private static final Logger logger = LoggerFactory.getLogger(UseCaseImpl.class);
-    private final ServiceImpl service;
+    private final NotificationServiceImpl notificationService;
     private final Gson gson;
     private final RepositoryUserImpl repo;
 
-    public Reponse execute(Request request) {
-        logger.info("User case - Request: " + gson.toJson(request));
+
+    public Response execute(Request request) {
+        logger.info("Use case - Request: " + gson.toJson(request));
 
         UserEntity user = repo.getById(request.getUserId());
 
+        if (user.getUser().getTokenNotification() == null) {
+            logger.error("Token device not registered - userId: " + user.getUserId());
+            return builderResponse(400, "Token device not registered - userId: " + user.getUserId());
+        }
+
         try {
-            if (!isExistEndpoint(user) || !isEndpointValid(user)) {
-                String endpoint = createAndUpdateEndpoint(user);
-                service.publish(endpoint, request);
-            } else
-                service.publish(user.getUser().getEndpointNotification(), request);
+            String endpoint = validedAndGetEndpoint(user);
+            notificationService.pubPush(request.getMessage(), endpoint);
+            return builderResponse(200, "Sucess!");
         } catch (Exception e) {
             return builderResponse(400, "Error: " + e.getMessage());
         }
+    }
 
-        return builderResponse(200, "Sucess!");
+    private String validedAndGetEndpoint(UserEntity user) {
+        if (user.getUser().getEndpointNotification() == null) {
+            return createAndUpdateEndpoint(user);
+        } else {
+            if (isEndpointValid(user.getUser().getEndpointNotification())) {
+                return user.getUser().getEndpointNotification();
+            } else {
+                notificationService.deleteEndpoint(user.getUser().getEndpointNotification());
+                return createAndUpdateEndpoint(user);
+            }
+        }
     }
 
     private String createAndUpdateEndpoint(UserEntity user) {
-        String endpoint = service.createEndpoint(user.getUser().getTokenNotification());
+        String endpoint = notificationService.createEndpoint(user.getUser().getTokenNotification());
         user.getUser().setEndpointNotification(endpoint);
         repo.save(user);
 
         return endpoint;
     }
 
-    private boolean isExistEndpoint(UserEntity user) {
-        return user.getUser().getEndpointNotification() != null;
+    private boolean isEndpointValid(String endpoint) {
+        GetEndpointAttributesResponse response = notificationService.getEndpointAttributes(endpoint);
+
+        return Boolean.parseBoolean(response.attributes().get("Enabled"));
+
     }
 
-    private boolean isEndpointValid(UserEntity user) {
-        return user.getUser().getEndpointNotification() != null;
-        //service.isEndpointValid(user.getUser().getEndpointNotification()
-    }
-
-    private Reponse builderResponse(int statusCode, String message) {
-        return Reponse.builder()
+    private Response builderResponse(int statusCode, String message) {
+        return Response.builder()
                 .statusCode(statusCode)
                 .message(message)
                 .build();
