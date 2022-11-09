@@ -1,0 +1,70 @@
+{
+    "data": {
+        "text": "teste sns local"
+    },
+    "finish": [Function finish
+    ],
+    "foreground": true,
+    "id": "-890086156",
+    "userInteraction": false
+}
+
+
+
+{
+    "channelId": "fcm_fallback_notification_channel",
+    "color": null,
+    "data": {},
+    "finish": [Function finish
+    ],
+    "foreground": true,
+    "id": "2051040509",
+    "message": "minha descrição",
+    "priority": "high",
+    "smallIcon": "ic_notification",
+    "sound": null,
+    "tag": "campaign_collapse_key_3750681689038896169",
+    "title": "Meu titulo ",
+    "userInteraction": false,
+    "visibility": "private"
+}
+
+{
+    "channelId": "fcm_fallback_notification_channel",
+    "color": null,
+    "data": {},
+    "finish": [Function finish
+    ],
+    "foreground": true,
+    "id": "2051040509",
+    "message": "minha descrição",
+    "priority": "high",
+    "smallIcon": "ic_notification",
+    "sound": null,
+    "tag": "campaign_collapse_key_3750681689038896169",
+    "title": "Meu titulo ",
+    "userInteraction": false,
+    "visibility": "private"
+}
+
+{
+    "data": {
+        "message": "Sample message for Android endpoints"
+    },
+    "finish": [Function finish
+    ],
+    "foreground": true,
+    "id": "-1463006675",
+    "userInteraction": false
+}
+
+{
+    "data": {
+        "default": "teste sns local"
+    },
+    "finish": [Function finish
+    ],
+    "foreground": true,
+    "id": "17398194",
+    "userInteraction": false
+}

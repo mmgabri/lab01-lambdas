@@ -15,11 +15,17 @@ PushNotification.configure({
   onNotification: function (notification) {
     console.log("onNotification:", notification);
 
-    if (notification.foreground){
+    if (notification.foreground) {
       Alert.alert("Foreground --> " + notification.data.message)
-     // console.log("Foreground --> " + notification.data.message)
-    //  Alert.alert(token)
+      console.log("Foreground --> " + notification.data.message)
     }
+
+    //   console.log("notification.userInteraction", notification.userInteraction)
+
+    //   if (notification.userInteraction) {
+    //     // onAction replacement here
+    //     props.navigation.replace('Chat');
+    //   }
 
     // process the notification
 
@@ -36,7 +42,7 @@ PushNotification.configure({
   },
 
   // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
-  onRegistrationError: function(err) {
+  onRegistrationError: function (err) {
     console.error(err.message, err);
   },
 

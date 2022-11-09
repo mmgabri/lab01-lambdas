@@ -41,6 +41,7 @@ const AuthProvider = ({ children, navigation }) => {
             const storageUser = await getUserStorage();
             //console.info('Usuário obtido do storage -->', storageUser)
             if (storageUser) {
+                registerAdvive(storageUser.id);
                 setUser(storageUser)
                 apiUser.defaults.headers.authorization = storageUser.idToken;
                 apiAnuncio.defaults.headers.Authorization = storageUser.idToken;
@@ -49,7 +50,6 @@ const AuthProvider = ({ children, navigation }) => {
             }
         };
         loadStorageData();
-        registerAdvive();
     }, [])
 
     function setLoading(value) {
@@ -146,7 +146,7 @@ const AuthProvider = ({ children, navigation }) => {
                 _showAlert('success', 'Bem vindo !', '', 3000);
                 setIsAuthenticated(true)
                 setIsLoading(false)
-                registerAdvive()
+                registerAdvive(userLogged.id)
             })
             .catch((error) => {
                 console.error('Erro na api signin:', error)
@@ -163,16 +163,16 @@ const AuthProvider = ({ children, navigation }) => {
         notAuthenticated();
     }
 
-    async function registerAdvive() {
+    async function registerAdvive(userId) {
 
         const storageTokenNotification = await getTokenNotification();
 
         console.log('---- Entrou registerAdvive ----' )
         console.log('Token: ' , storageTokenNotification.token )
-      //  console.log('User: ' , user )
+        console.log('userId: ' , userId )
 
-        if (storageTokenNotification && user.id) {
-            apiUser.post('/registeradvice', { userId: user.id, tokenNotification: storageTokenNotification.token })
+        if (storageTokenNotification && userId) {
+            apiUser.post('/registeradvice', { userId: userId, tokenNotification: storageTokenNotification.token })
             .then((response) => {
                 console.info('Sucesso na chamada da api /registeradvice:', response.data)
             })

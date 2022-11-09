@@ -34,6 +34,7 @@ public class NotificationServiceImpl implements NotificationService {
     public PublishResponse pubPush(String message, String endpoint) {
 
         PublishRequest request = PublishRequest.builder()
+                .messageStructure("json")
                 .message(message)
                 .targetArn(endpoint)
                 .build();

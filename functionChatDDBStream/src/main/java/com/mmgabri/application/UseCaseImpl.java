@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiredArgsConstructor
 public class UseCaseImpl {
     private static final Logger logger = LoggerFactory.getLogger(UseCaseImpl.class);
@@ -31,7 +34,7 @@ public class UseCaseImpl {
 
         try {
             String endpoint = validedAndGetEndpoint(user);
-            notificationService.pubPush(request.getMessage(), endpoint);
+            notificationService.pubPush(formatPush(request), endpoint);
             return builderResponse(200, "Sucess!");
         } catch (Exception e) {
             return builderResponse(400, "Error: " + e.getMessage());
@@ -71,5 +74,30 @@ public class UseCaseImpl {
                 .statusCode(statusCode)
                 .message(message)
                 .build();
+    }
+
+    public String formatPush (Request request){
+
+        Map<String, Object> androidMsg = new HashMap<String, Object>();
+        Map<String, String> notificationsFieldsMap = new HashMap<String, String>();
+        Map<String, String> dataFieldsMap = new HashMap<String, String>();
+
+        notificationsFieldsMap.put("body", request.getMessage());
+        notificationsFieldsMap.put("title", "Chegou mensagem para você");
+
+        dataFieldsMap.put("message", request.getMessage());
+        dataFieldsMap.put("chatId", request.getChatId());
+
+        androidMsg.put("notification", notificationsFieldsMap);
+        androidMsg.put("data", dataFieldsMap);
+
+        String message = gson.toJson(androidMsg);
+
+        Map<String, String> msgMap = new HashMap<String, String>();
+        msgMap.put("GCM", message);
+
+        String sendMsg = gson.toJson(msgMap);
+
+        return sendMsg;
     }
 }
